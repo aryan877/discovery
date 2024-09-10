@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useCanvasClient } from "../hooks/useCanvasClient";
+import Link from "next/link";
 import {
   PublicKey,
   Connection,
@@ -35,7 +36,7 @@ const clusterList: ClusterInfo[] = [
 ];
 
 const CanvasSolanaTransfer: React.FC = () => {
-  const { isReady, client: canvasClient } = useCanvasClient();
+  const { isReady, client: canvasClient, user } = useCanvasClient();
   const [clusterInfo, setClusterInfo] = useState<ClusterInfo>(clusterList[0]);
   const [sourceAddress, setSourceAddress] = useState<string>("");
   const [targetAddress, setTargetAddress] = useState<string>("");
@@ -173,6 +174,17 @@ const CanvasSolanaTransfer: React.FC = () => {
       ref={bodyRef}
       className="flex flex-col justify-center items-center gap-6 w-screen p-10"
     >
+      <div className="w-full flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Solana Transfer</h1>
+        {user && (
+          <Link href={`/profile/${user.username}`} passHref>
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              View Profile
+            </button>
+          </Link>
+        )}
+      </div>
+
       {successfulSignedTx ? (
         <div className="flex flex-col justify-center items-center gap-6">
           <p className="text-2xl text-green-500">

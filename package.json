@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.8",
     "@dscvr-one/canvas-client-sdk": "^1.1.1",
     "@dscvr-one/canvas-wallet-adapter": "^1.0.2",
     "@dscvr-one/canvas-wallet-interface": "^1.0.2",
@@ -16,6 +17,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/web3.js": "^1.95.3",
     "bs58": "^6.0.0",
+    "graphql": "^16.9.0",
     "lucide-react": "^0.439.0",
     "next": "14.2.9",
     "react": "^18",

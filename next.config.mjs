@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export",
   reactStrictMode: true,
   webpack: (config, { dev }) => {
     if (dev) {
@@ -21,7 +20,7 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: `
-              connect-src 'self' https://api.devnet.solana.com https://api.dscvr.one https://api1.stg.dscvr.one https://*.helius-rpc.com;
+              connect-src 'self' https://api.devnet.solana.com https://api.dscvr.one https://api1.stg.dscvr.one https://*.helius-rpc.com https://*.dscvr.one;
             `
               .replace(/\s{2,}/g, " ")
               .trim(),

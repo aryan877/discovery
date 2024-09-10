@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ClientWrapper } from "./ClientWrapper";
+import { ApolloWrapper } from "@/lib/apolloClient";
 import { SolanaConnectionProvider } from "./context/solanaConnectionContext";
 
 const geistSans = localFont({
@@ -34,9 +35,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClientWrapper>
-          <SolanaConnectionProvider>{children}</SolanaConnectionProvider>
-        </ClientWrapper>
+        <ApolloWrapper>
+          <ClientWrapper>
+            <SolanaConnectionProvider>{children}</SolanaConnectionProvider>
+          </ClientWrapper>
+        </ApolloWrapper>
       </body>
     </html>
   );
