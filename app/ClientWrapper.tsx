@@ -1,33 +1,64 @@
 "use client";
 
-import React, { useMemo } from "react";
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from "@solana/wallet-adapter-react";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { clusterApiUrl } from "@solana/web3.js";
+import React, { useEffect, useState } from "react";
 import { useCanvasClient } from "./hooks/useCanvasClient";
-
-require("@solana/wallet-adapter-react-ui/styles.css");
+import { registerCanvasWallet } from "@dscvr-one/canvas-wallet-adapter";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 
 export function ClientWrapper({ children }: { children: React.ReactNode }) {
-  const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const wallets = useMemo(() => [], []);
+  const { isReady: isCanvasReady, client: canvasClient } = useCanvasClient();
+  const [isConnected, setIsConnected] = useState(false);
 
-  const { isReady: isCanvasReady } = useCanvasClient();
+  useEffect(() => {
+    if (canvasClient) {
+      registerCanvasWallet(canvasClient);
+      console.log("Canvas wallet registered");
+    }
+  }, [canvasClient]);
+
+  const handleConnect = async () => {
+    if (canvasClient) {
+      try {
+        const chainId = WalletAdapterNetwork.Devnet;
+        await canvasClient.connectWallet(chainId);
+        setIsConnected(true);
+        console.log("Wallet connected successfully to Solana devnet");
+      } catch (error) {
+        console.error("Failed to connect wallet:", error);
+      }
+    }
+  };
 
   if (!isCanvasReady) {
     return <div>Loading Canvas...</div>;
   }
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>{children}</WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <div>
+      <div
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          zIndex: 1000,
+        }}
+      >
+        <button
+          onClick={handleConnect}
+          disabled={isConnected}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: isConnected ? "#4CAF50" : "#008CBA",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: isConnected ? "default" : "pointer",
+          }}
+        >
+          {isConnected ? "Connected to Devnet" : "Connect to Devnet"}
+        </button>
+      </div>
+      {children}
+    </div>
   );
 }

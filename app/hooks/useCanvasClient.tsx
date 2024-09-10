@@ -1,4 +1,3 @@
-// hooks/useCanvasClient.ts
 import { useState, useEffect } from "react";
 import { CanvasClient, CanvasInterface } from "@dscvr-one/canvas-client-sdk";
 import { getCanvasClient } from "@/lib/canvasClientSingleton";
