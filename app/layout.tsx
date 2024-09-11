@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClientWrapper } from "./ClientWrapper";
 import { ApolloWrapper } from "@/lib/apolloClient";
 import { SolanaConnectionProvider } from "./context/solanaConnectionContext";
+import { Navbar } from "./component/Navbar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,7 +38,10 @@ export default function RootLayout({
       >
         <ApolloWrapper>
           <ClientWrapper>
-            <SolanaConnectionProvider>{children}</SolanaConnectionProvider>
+            <SolanaConnectionProvider>
+              <Navbar />
+              {children}
+            </SolanaConnectionProvider>
           </ClientWrapper>
         </ApolloWrapper>
       </body>
