@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useCanvasClient } from "../hooks/useCanvasClient";
+import useCanvasWallet from "../CanvasWalletProvider";
 import Link from "next/link";
 import {
   PublicKey,
@@ -11,7 +11,7 @@ import {
   LAMPORTS_PER_SOL,
   clusterApiUrl,
 } from "@solana/web3.js";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+
 import * as bs58 from "bs58";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,30 +23,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-type ClusterInfo = {
-  name: string;
-  cluster: WalletAdapterNetwork;
-  chainId: string;
-  appUrl?: string;
-};
-
-const clusterList: ClusterInfo[] = [
-  {
-    name: "Devnet",
-    cluster: WalletAdapterNetwork.Devnet,
-    chainId: "solana:103",
-  },
-  {
-    name: "Mainnet",
-    cluster: WalletAdapterNetwork.Mainnet,
-    chainId: "solana:101",
-    appUrl: process.env.NEXT_PUBLIC_SOLANA_MAINNET_CLUSTER,
-  },
-];
+import { ClusterInfo, clusterList } from "@/lib/cluster";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 
 const CanvasSolanaTransfer: React.FC = () => {
-  const { isReady, client: canvasClient, user } = useCanvasClient();
+  const { client: canvasClient, user } = useCanvasWallet();
   const [clusterInfo, setClusterInfo] = useState<ClusterInfo>(clusterList[0]);
   const [sourceAddress, setSourceAddress] = useState<string>("");
   const [targetAddress, setTargetAddress] = useState<string>("");
@@ -175,23 +156,37 @@ const CanvasSolanaTransfer: React.FC = () => {
     setClusterInfo(clusterList[0]);
   };
 
-  if (!isReady) {
-    return <p className="text-center">Loading...</p>;
-  }
-
   return (
     <div
       ref={bodyRef}
       className="flex flex-col justify-center items-center gap-6 w-screen p-10"
     >
       <Card className="w-full max-w-2xl">
-        <CardHeader className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Solana Transfer</h1>
-          {user && (
-            <Link href={`/profile/${user.username}`} passHref>
-              <Button>View Profile</Button>
-            </Link>
-          )}
+        <CardHeader className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">Solana Transfer</h1>
+            {user && (
+              <Link href={`/profile/${user.username}`} passHref>
+                <Button variant="outline">View Profile</Button>
+              </Link>
+            )}
+          </div>
+          <div className="flex justify-center">
+            {clusterList.map((clusterItem) => (
+              <Button
+                key={clusterItem.cluster}
+                onClick={() => setClusterInfo(clusterItem)}
+                variant={
+                  clusterInfo.cluster === clusterItem.cluster
+                    ? "default"
+                    : "secondary"
+                }
+                className="mx-1"
+              >
+                {clusterItem.name}
+              </Button>
+            ))}
+          </div>
         </CardHeader>
         <CardContent>
           {successfulSignedTx ? (
@@ -220,7 +215,9 @@ const CanvasSolanaTransfer: React.FC = () => {
               {sourceAddress && (
                 <div className="flex items-center gap-4">
                   <Label className="min-w-28">Source Address</Label>
-                  <span className="flex-1 text-gray-400">{sourceAddress}</span>
+                  <span className="flex-1 text-gray-400 truncate">
+                    {sourceAddress}
+                  </span>
                 </div>
               )}
               <div className="space-y-2">
@@ -250,25 +247,17 @@ const CanvasSolanaTransfer: React.FC = () => {
             </form>
           )}
         </CardContent>
-        <CardFooter className="flex justify-center gap-4">
-          {clusterList.map((clusterItem) => (
-            <Button
-              key={clusterItem.cluster}
-              type="submit"
-              onClick={() => {
-                setClusterInfo(clusterItem);
-                sendTransaction();
-              }}
-              disabled={isProcessing}
-              variant={
-                clusterItem.cluster === WalletAdapterNetwork.Mainnet
-                  ? "destructive"
-                  : "default"
-              }
-            >
-              {isProcessing ? "Processing..." : `Send (${clusterItem.name})`}
-            </Button>
-          ))}
+        <CardFooter className="flex justify-center">
+          <Button
+            type="submit"
+            onClick={sendTransaction}
+            disabled={isProcessing}
+            variant={
+              clusterInfo.cluster === "mainnet-beta" ? "destructive" : "default"
+            }
+          >
+            {isProcessing ? "Processing..." : `Send (${clusterInfo.name})`}
+          </Button>
         </CardFooter>
       </Card>
     </div>

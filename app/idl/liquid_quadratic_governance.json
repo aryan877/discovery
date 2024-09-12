@@ -1,0 +1,547 @@
+{
+  "address": "EHaj8vkVimvsC6Z4nnotUQ6kDf1kC39X2wbaaJxz8jSC",
+  "metadata": {
+    "name": "liquid_quadratic_governance",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "create_proposal",
+      "discriminator": [132, 116, 68, 174, 216, 160, 198, 22],
+      "accounts": [
+        {
+          "name": "governance",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
+              }
+            ]
+          }
+        },
+        {
+          "name": "proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 114, 111, 112, 111, 115, 97, 108]
+              },
+              {
+                "kind": "account",
+                "path": "governance.proposal_count",
+                "account": "Governance"
+              }
+            ]
+          }
+        },
+        {
+          "name": "proposer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "voting_period",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "delegate",
+      "discriminator": [90, 147, 75, 178, 85, 88, 4, 137],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "delegator_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "delegator_authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "delegate_to",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "finalize_proposal",
+      "discriminator": [23, 68, 51, 167, 109, 173, 187, 164],
+      "accounts": [
+        {
+          "name": "proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 114, 111, 112, 111, 115, 97, 108]
+              },
+              {
+                "kind": "account",
+                "path": "proposal.id",
+                "account": "Proposal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "governance",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
+              }
+            ]
+          }
+        },
+        {
+          "name": "finalizer",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
+      "accounts": [
+        {
+          "name": "governance",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_user",
+      "discriminator": [111, 17, 185, 250, 60, 122, 38, 254],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "user_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": ["governance"]
+        },
+        {
+          "name": "governance",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "initial_base_power",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "undelegate",
+      "discriminator": [131, 148, 180, 198, 91, 104, 42, 238],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "user_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "vote",
+      "discriminator": [227, 110, 155, 23, 136, 126, 172, 25],
+      "accounts": [
+        {
+          "name": "proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 114, 111, 112, 111, 115, 97, 108]
+              },
+              {
+                "kind": "account",
+                "path": "proposal.id",
+                "account": "Proposal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "voter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "voter_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "voter_authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "vote_type",
+          "type": {
+            "defined": {
+              "name": "VoteType"
+            }
+          }
+        },
+        {
+          "name": "voting_power",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Governance",
+      "discriminator": [18, 143, 88, 13, 73, 217, 47, 49]
+    },
+    {
+      "name": "Proposal",
+      "discriminator": [26, 94, 189, 187, 116, 136, 53, 33]
+    },
+    {
+      "name": "User",
+      "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
+    }
+  ],
+  "events": [
+    {
+      "name": "ProposalFinalizedEvent",
+      "discriminator": [228, 151, 231, 28, 58, 215, 17, 130]
+    },
+    {
+      "name": "VoteEvent",
+      "discriminator": [195, 71, 250, 105, 120, 119, 234, 134]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NumericalOverflow",
+      "msg": "Numerical overflow occurred"
+    },
+    {
+      "code": 6001,
+      "name": "ProposalNotActive",
+      "msg": "Proposal is not active"
+    },
+    {
+      "code": 6002,
+      "name": "VotingPeriodEnded",
+      "msg": "Voting period has ended"
+    },
+    {
+      "code": 6003,
+      "name": "VotingPeriodNotEnded",
+      "msg": "Voting period has not ended yet"
+    },
+    {
+      "code": 6004,
+      "name": "ProposalAlreadyFinalized",
+      "msg": "Proposal has already been finalized"
+    },
+    {
+      "code": 6005,
+      "name": "AlreadyDelegated",
+      "msg": "User has already delegated their voting power"
+    },
+    {
+      "code": 6006,
+      "name": "NotDelegated",
+      "msg": "User has not delegated their voting power"
+    }
+  ],
+  "types": [
+    {
+      "name": "Governance",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal_count",
+            "type": "u64"
+          },
+          {
+            "name": "total_base_power",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Proposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_votes",
+            "type": "u64"
+          },
+          {
+            "name": "no_votes",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ProposalStatus"
+              }
+            }
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalFinalizedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ProposalStatus"
+              }
+            }
+          },
+          {
+            "name": "yes_votes",
+            "type": "u64"
+          },
+          {
+            "name": "no_votes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Passed"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    },
+    {
+      "name": "User",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "base_power",
+            "type": "u64"
+          },
+          {
+            "name": "reputation",
+            "type": "u8"
+          },
+          {
+            "name": "last_vote_time",
+            "type": "i64"
+          },
+          {
+            "name": "delegated_to",
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_type",
+            "type": {
+              "defined": {
+                "name": "VoteType"
+              }
+            }
+          },
+          {
+            "name": "voting_power",
+            "type": "u64"
+          },
+          {
+            "name": "original_voting_power",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Yes"
+          },
+          {
+            "name": "No"
+          }
+        ]
+      }
+    }
+  ]
+}

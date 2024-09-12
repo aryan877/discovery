@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useCanvasClient } from "../hooks/useCanvasClient";
+import useCanvasWallet from "../CanvasWalletProvider";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const Navbar: React.FC = () => {
-  const { client: canvasClient } = useCanvasClient();
+  const { client: canvasClient } = useCanvasWallet();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const balance = useWalletBalance(walletAddress);
 
@@ -34,7 +34,7 @@ export const Navbar: React.FC = () => {
     <Card className="bg-card">
       <CardContent className="py-4">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-foreground font-bold text-xl">My Solana App</div>
+          <div className="text-foreground font-bold text-xl">DSCVRY</div>
           <div className="flex items-center">
             {walletAddress ? (
               <>
