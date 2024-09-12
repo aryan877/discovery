@@ -13,6 +13,16 @@ import {
 } from "@solana/web3.js";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import * as bs58 from "bs58";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type ClusterInfo = {
   name: string;
@@ -174,95 +184,93 @@ const CanvasSolanaTransfer: React.FC = () => {
       ref={bodyRef}
       className="flex flex-col justify-center items-center gap-6 w-screen p-10"
     >
-      <div className="w-full flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Solana Transfer</h1>
-        {user && (
-          <Link href={`/profile/${user.username}`} passHref>
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              View Profile
-            </button>
-          </Link>
-        )}
-      </div>
-
-      {successfulSignedTx ? (
-        <div className="flex flex-col justify-center items-center gap-6">
-          <p className="text-2xl text-green-500">
-            Transaction sent successfully
-          </p>
-          <a
-            className="text-indigo-400 hover:underline text-indigo-300 cursor-pointer"
-            onClick={openTransactionLink}
-          >
-            Open in Solana.fm
-          </a>
-          <button
-            onClick={clear}
-            className="bg-gray-500 hover:bg-gray-400 text-white font-bold py-2 px-4 border-b-4 border-gray-700 hover:border-gray-500 rounded"
-          >
-            Close
-          </button>
-        </div>
-      ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendTransaction();
-          }}
-          className="flex flex-col justify-center items-center gap-6 w-full"
-        >
-          <h2 className="text-2xl">Send Transaction</h2>
-          {sourceAddress && (
-            <div className="flex items-center gap-4 w-full">
-              <label className="min-w-28">Source Address</label>
-              <span className="flex-1 text-gray-400">{sourceAddress}</span>
-            </div>
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Solana Transfer</h1>
+          {user && (
+            <Link href={`/profile/${user.username}`} passHref>
+              <Button>View Profile</Button>
+            </Link>
           )}
-          <div className="flex flex-col md:flex-row items-center gap-4 w-full">
-            <label htmlFor="target" className="min-w-28">
-              Target address
-            </label>
-            <input
-              type="text"
-              name="target"
-              className="flex-1 text-gray-700 border border-gray-700 rounded-xl w-full"
-              value={targetAddress}
-              onChange={(e) => setTargetAddress(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col md:flex-row items-center gap-4 w-full">
-            <label htmlFor="amount" className="min-w-28">
-              Amount (SOL)
-            </label>
-            <input
-              type="number"
-              name="amount"
-              className="flex-1 text-gray-700 border border-gray-700 rounded-xl w-full"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              step="0.000000001"
-            />
-          </div>
-          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-          <div className="flex flex-col md:flex-row gap-6 items-center">
-            {clusterList.map((clusterItem) => (
-              <button
-                key={clusterItem.cluster}
-                type="submit"
-                className={`text-white font-bold py-2 px-4 border-b-4 rounded ${
-                  clusterItem.cluster === WalletAdapterNetwork.Mainnet
-                    ? "bg-amber-500 hover:bg-amber-400 border-amber-700 hover:border-amber-500"
-                    : "bg-gray-500 hover:bg-gray-400 border-gray-700 hover:border-gray-500"
-                }`}
-                onClick={() => setClusterInfo(clusterItem)}
-                disabled={isProcessing}
-              >
-                {isProcessing ? "Processing..." : `Send (${clusterItem.name})`}
-              </button>
-            ))}
-          </div>
-        </form>
-      )}
+        </CardHeader>
+        <CardContent>
+          {successfulSignedTx ? (
+            <div className="flex flex-col justify-center items-center gap-6">
+              <Alert variant="default">
+                <AlertDescription>
+                  Transaction sent successfully
+                </AlertDescription>
+              </Alert>
+              <Button variant="link" onClick={openTransactionLink}>
+                Open in Solana.fm
+              </Button>
+              <Button onClick={clear} variant="secondary">
+                Close
+              </Button>
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendTransaction();
+              }}
+              className="space-y-6"
+            >
+              <h2 className="text-2xl text-center">Send Transaction</h2>
+              {sourceAddress && (
+                <div className="flex items-center gap-4">
+                  <Label className="min-w-28">Source Address</Label>
+                  <span className="flex-1 text-gray-400">{sourceAddress}</span>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="target">Target address</Label>
+                <Input
+                  type="text"
+                  id="target"
+                  value={targetAddress}
+                  onChange={(e) => setTargetAddress(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (SOL)</Label>
+                <Input
+                  type="number"
+                  id="amount"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  step="0.000000001"
+                />
+              </div>
+              {errorMessage && (
+                <Alert variant="destructive">
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
+            </form>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-center gap-4">
+          {clusterList.map((clusterItem) => (
+            <Button
+              key={clusterItem.cluster}
+              type="submit"
+              onClick={() => {
+                setClusterInfo(clusterItem);
+                sendTransaction();
+              }}
+              disabled={isProcessing}
+              variant={
+                clusterItem.cluster === WalletAdapterNetwork.Mainnet
+                  ? "destructive"
+                  : "default"
+              }
+            >
+              {isProcessing ? "Processing..." : `Send (${clusterItem.name})`}
+            </Button>
+          ))}
+        </CardFooter>
+      </Card>
     </div>
   );
 };

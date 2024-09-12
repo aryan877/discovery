@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useCanvasClient } from "../hooks/useCanvasClient";
 import { useWalletBalance } from "../hooks/useWalletBalance";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const Navbar: React.FC = () => {
   const { client: canvasClient } = useCanvasClient();
@@ -29,35 +31,31 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-gray-800 p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="text-white font-bold text-xl">My Solana App</div>
-        <div className="flex items-center">
-          {walletAddress ? (
-            <>
-              <span className="text-white mr-4">
-                Balance: {balance !== null ? `${balance} SOL` : "Loading..."}
-              </span>
-              <span className="text-white mr-4">
-                {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
-              </span>
-              <button
-                onClick={disconnectWallet}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Disconnect
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={connectWallet}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Connect Wallet
-            </button>
-          )}
+    <Card className="bg-card">
+      <CardContent className="py-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="text-foreground font-bold text-xl">My Solana App</div>
+          <div className="flex items-center">
+            {walletAddress ? (
+              <>
+                <span className="text-foreground mr-4">
+                  Balance: {balance !== null ? `${balance} SOL` : "Loading..."}
+                </span>
+                <span className="text-foreground mr-4">
+                  {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                </span>
+                <Button onClick={disconnectWallet} variant="destructive">
+                  Disconnect
+                </Button>
+              </>
+            ) : (
+              <Button onClick={connectWallet} variant="default">
+                Connect Wallet
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
-    </nav>
+      </CardContent>
+    </Card>
   );
 };

@@ -13,6 +13,10 @@ import {
   Award,
   Wallet,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const GET_USER = gql`
   query GetUser($name: String!) {
@@ -49,16 +53,6 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({
   iconUrl,
   username,
 }) => {
-  if (iconUrl) {
-    return (
-      <img
-        src={iconUrl}
-        alt={username}
-        className="w-24 h-24 rounded-full border-2 border-gray-700"
-      />
-    );
-  }
-
   const initials = username
     .split(" ")
     .map((name) => name[0])
@@ -67,9 +61,10 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({
     .slice(0, 2);
 
   return (
-    <div className="w-24 h-24 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center">
-      <span className="text-2xl font-bold text-gray-300">{initials}</span>
-    </div>
+    <Avatar className="w-24 h-24">
+      <AvatarImage src={iconUrl || undefined} alt={username} />
+      <AvatarFallback>{initials}</AvatarFallback>
+    </Avatar>
   );
 };
 
@@ -111,103 +106,123 @@ const UserProfile: React.FC = () => {
   });
 
   if (loading)
-    return <p className="text-center text-gray-400">Loading user profile...</p>;
+    return (
+      <p className="text-center text-muted-foreground">
+        Loading user profile...
+      </p>
+    );
   if (error)
-    return <p className="text-center text-red-500">Error: {error.message}</p>;
-  if (!data) return <p className="text-center text-gray-400">No data found</p>;
+    return (
+      <p className="text-center text-destructive">Error: {error.message}</p>
+    );
+  if (!data)
+    return <p className="text-center text-muted-foreground">No data found</p>;
 
   const user = data.userByName;
 
   return (
-    <div className="bg-black min-h-screen text-gray-300">
+    <div className="bg-background min-h-screen text-foreground">
       <div className="max-w-4xl mx-auto p-6">
-        <Link
-          href="/"
-          className="mb-8 text-gray-400 hover:text-gray-200 inline-flex items-center transition-colors duration-200"
-        >
-          <ArrowLeft className="mr-2" size={20} />
-          Back to Transfer
+        <Link href="/" passHref>
+          <Button variant="link" className="mb-8">
+            <ArrowLeft className="mr-2" size={20} />
+            Back to Transfer
+          </Button>
         </Link>
 
-        <div className="bg-gray-900 rounded-lg shadow-xl p-8 mb-8">
-          <div className="flex items-center mb-8">
-            <ProfilePicture iconUrl={user.iconUrl} username={user.username} />
-            <div className="ml-6">
-              <h2 className="text-3xl font-bold text-gray-100">
-                {user.username}
-              </h2>
-              <p className="text-gray-400 mt-2">{user.bio}</p>
+        <Card>
+          <CardContent className="p-8">
+            <div className="flex items-center mb-8">
+              <ProfilePicture iconUrl={user.iconUrl} username={user.username} />
+              <div className="ml-6">
+                <h2 className="text-3xl font-bold">{user.username}</h2>
+                <p className="text-muted-foreground mt-2">{user.bio}</p>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-            <div className="flex items-center">
-              <Users className="text-gray-500 mr-2" size={20} />
-              <span>{user.followerCount} Followers</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+              <div className="flex items-center">
+                <Users className="text-muted-foreground mr-2" size={20} />
+                <span>{user.followerCount} Followers</span>
+              </div>
+              <div className="flex items-center">
+                <UserPlus className="text-muted-foreground mr-2" size={20} />
+                <span>{user.followingCount} Following</span>
+              </div>
+              <div className="flex items-center">
+                <MessageSquare
+                  className="text-muted-foreground mr-2"
+                  size={20}
+                />
+                <span>{user.postCount} Posts</span>
+              </div>
+              <div className="flex items-center">
+                <Calendar className="text-muted-foreground mr-2" size={20} />
+                <span>
+                  Joined {new Date(user.createdAt).toLocaleDateString()}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center">
-              <UserPlus className="text-gray-500 mr-2" size={20} />
-              <span>{user.followingCount} Following</span>
-            </div>
-            <div className="flex items-center">
-              <MessageSquare className="text-gray-500 mr-2" size={20} />
-              <span>{user.postCount} Posts</span>
-            </div>
-            <div className="flex items-center">
-              <Calendar className="text-gray-500 mr-2" size={20} />
-              <span>
-                Joined {new Date(user.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
 
-          <div className="bg-gray-800 rounded-lg p-6 mb-6">
-            <h3 className="text-xl font-semibold mb-4 flex items-center">
-              <Award className="text-gray-400 mr-2" size={24} />
-              DSCVR Points
-            </h3>
-            <p className="text-2xl font-bold text-gray-100">
-              {(parseInt(user.dscvrPoints) / 1_000_000).toLocaleString()} Points
-            </p>
-          </div>
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Award className="text-muted-foreground mr-2" size={24} />
+                  DSCVR Points
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {(parseInt(user.dscvrPoints) / 1_000_000).toLocaleString()}{" "}
+                  Points
+                </p>
+              </CardContent>
+            </Card>
 
-          <div className="bg-gray-800 rounded-lg p-6 mb-6">
-            <h3 className="text-xl font-semibold mb-4 flex items-center">
-              <Award className="text-gray-400 mr-2" size={24} />
-              Active Streak
-            </h3>
-            <p className="text-2xl font-bold text-gray-100">
-              {user.streak.dayCount} Days
-              <span className="text-lg font-normal ml-2 text-gray-400">
-                (x{user.streak.multiplierCount} Multiplier)
-              </span>
-            </p>
-          </div>
-
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4 flex items-center">
-              <Wallet className="text-gray-400 mr-2" size={24} />
-              Wallets
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {user.wallets.map((wallet: Wallet, index: number) => (
-                <div
-                  key={index}
-                  className="bg-gray-900 rounded-lg p-4 flex items-center justify-between"
-                >
-                  <span className="font-mono text-gray-300">
-                    {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Award className="text-muted-foreground mr-2" size={24} />
+                  Active Streak
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {user.streak.dayCount} Days
+                  <span className="text-lg font-normal ml-2 text-muted-foreground">
+                    (x{user.streak.multiplierCount} Multiplier)
                   </span>
-                  {wallet.isPrimary && (
-                    <span className="bg-gray-700 text-gray-300 text-xs font-bold px-2 py-1 rounded-full">
-                      Primary
-                    </span>
-                  )}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Wallet className="text-muted-foreground mr-2" size={24} />
+                  Wallets
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {user.wallets.map((wallet: Wallet, index: number) => (
+                    <Card key={index}>
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <span className="font-mono">
+                          {wallet.address.slice(0, 6)}...
+                          {wallet.address.slice(-4)}
+                        </span>
+                        {wallet.isPrimary && (
+                          <Badge variant="secondary">Primary</Badge>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
