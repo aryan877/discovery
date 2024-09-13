@@ -41,7 +41,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-2xl mx-auto py-4 px-4">
         <div className="flex justify-between items-center">
           <Link href="/">
-            <div className=" font-bold text-xl">DSCVRY</div>
+            <div className=" font-bold text-xl">DISCOVRY</div>
           </Link>
 
           <div className="flex items-center space-x-4">

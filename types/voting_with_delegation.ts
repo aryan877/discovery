@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/voting_with_delegation.json`.
  */
 export type VotingWithDelegation = {
-  address: "EAeyPzTziA1QbpobqkzKF3tSmUXT2WRkahgSkAns8mpz";
+  address: "8eCnu6Px3bSjsAdWFN1CYm6y4tYegAJU7Kd5Cy5Tw62R";
   metadata: {
     name: "votingWithDelegation";
     version: "0.1.0";
@@ -254,22 +254,6 @@ export type VotingWithDelegation = {
               {
                 kind: "account";
                 path: "proposal";
-              }
-            ];
-          };
-        },
-        {
-          name: "user";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [117, 115, 101, 114];
-              },
-              {
-                kind: "account";
-                path: "voter";
               }
             ];
           };

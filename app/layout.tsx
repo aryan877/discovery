@@ -18,7 +18,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "DSCVRY",
+  title: "DISCOVRY",
   description: "",
   other: {
     "dscvr:canvas:version": "vNext",

@@ -16,12 +16,6 @@ function Home() {
           <Link href="/canvas-transfer" passHref>
             <Button variant="outline">Transfer SOL</Button>
           </Link>
-          <Link href="/delegate" passHref>
-            <Button variant="outline">Delegate</Button>
-          </Link>
-          <Link href="/undelegate" passHref>
-            <Button variant="outline">Undelegate</Button>
-          </Link>
         </div>
         <div>
           <ProposalFeed />
