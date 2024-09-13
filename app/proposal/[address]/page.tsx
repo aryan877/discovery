@@ -52,52 +52,6 @@ const fetchProposal = async (proposalAddress: string): Promise<Proposal> => {
   return parsedProposal;
 };
 
-interface VoteEvent {
-  voter: string;
-  voteType: "Yes" | "No";
-  timestamp: number;
-}
-
-const fetchRecentVoters = async (
-  proposalAddress: string
-): Promise<VoteEvent[]> => {
-  const connection = getDevnetConnection();
-  const proposalPubkey = new PublicKey(proposalAddress);
-
-  const signatures = await connection.getSignaturesForAddress(proposalPubkey, {
-    limit: 100,
-  });
-
-  const events: VoteEvent[] = [];
-
-  for (const signatureInfo of signatures) {
-    const tx = await connection.getTransaction(signatureInfo.signature, {
-      maxSupportedTransactionVersion: 0,
-    });
-
-    if (tx && tx.meta && tx.meta.logMessages) {
-      const voteEventLog = tx.meta.logMessages.find((log) =>
-        log.includes("VoteEvent")
-      );
-      if (voteEventLog) {
-        const [, voter, voteTypeRaw] =
-          voteEventLog.match(/VoteEvent: (\w+) voted (\w+)/) || [];
-        if (voter && voteTypeRaw) {
-          events.push({
-            voter,
-            voteType: voteTypeRaw === "Yes" ? "Yes" : "No",
-            timestamp: tx.blockTime ? tx.blockTime * 1000 : Date.now(),
-          });
-        }
-      }
-    }
-
-    if (events.length >= 10) break;
-  }
-
-  return events;
-};
-
 const ProposalDetailPage: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(dayjs());
   const pathname = usePathname();
@@ -112,13 +66,6 @@ const ProposalDetailPage: React.FC = () => {
   } = useQuery({
     queryKey: ["proposal", proposalAddress],
     queryFn: () => fetchProposal(proposalAddress),
-    enabled: !!proposalAddress,
-    refetchInterval: 30000,
-  });
-
-  const { data: recentVoters, isLoading: isLoadingVoters } = useQuery({
-    queryKey: ["recentVoters", proposalAddress],
-    queryFn: () => fetchRecentVoters(proposalAddress),
     enabled: !!proposalAddress,
     refetchInterval: 30000,
   });
@@ -268,31 +215,6 @@ const ProposalDetailPage: React.FC = () => {
           >
             Connect Wallet
           </Button>
-        )}
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Recent Voters</h2>
-        {isLoadingVoters ? (
-          <p>Loading recent voters...</p>
-        ) : recentVoters && recentVoters.length > 0 ? (
-          <ul className="space-y-2">
-            {recentVoters.map((event, index) => (
-              <li key={index} className="flex justify-between items-center">
-                <span>
-                  {event.voter.slice(0, 4)}...{event.voter.slice(-4)}
-                </span>
-                <span>
-                  Voted {event.voteType}{" "}
-                  <span className="text-gray-400 text-sm">
-                    {dayjs(event.timestamp).fromNow()}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No recent votes</p>
         )}
       </div>
     </div>
