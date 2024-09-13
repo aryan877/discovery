@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Connection, PublicKey } from "@solana/web3.js";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import duration from "dayjs/plugin/duration";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCcw } from "lucide-react";
@@ -26,46 +25,54 @@ dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 
-const PROGRAM_ID_PK = new PublicKey(PROGRAM_ID_STRING);
+const PROGRAM_ID = new PublicKey(PROGRAM_ID_STRING);
 
 const truncateText = (text: string, maxLength: number) => {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + "...";
 };
 
-const fetchProposals = async () => {
-  const devnetCluster = clusterList.find((c) => c.name === "Devnet");
-  if (!devnetCluster) throw new Error("Devnet cluster not found");
-
-  const connection = new Connection(devnetCluster.url, "confirmed");
-  const programAccounts = await connection.getProgramAccounts(PROGRAM_ID_PK);
-
-  return programAccounts
-    .map((item) =>
-      deserializeProposal(item.pubkey.toBase58(), item.account.data)
-    )
-    .filter((proposal): proposal is Proposal => proposal !== null);
-};
-
 const ProposalFeed: React.FC = () => {
-  const queryClient = useQueryClient();
-  const {
-    data: proposals = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["proposals"],
-    queryFn: fetchProposals,
-    refetchInterval: 30000,
-  });
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(dayjs());
 
-  const [currentTime, setCurrentTime] = React.useState(dayjs());
-
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setInterval(() => setCurrentTime(dayjs()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const fetchProposals = useCallback(async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const devnetCluster = clusterList.find((c) => c.name === "Devnet");
+      if (!devnetCluster) throw new Error("Devnet cluster not found");
+
+      const connection = new Connection(devnetCluster.url, "confirmed");
+      const programAccounts = await connection.getProgramAccounts(PROGRAM_ID);
+
+      const parsedProposals = programAccounts
+        .map((item) =>
+          deserializeProposal(item.pubkey.toBase58(), item.account.data)
+        )
+        .filter((proposal): proposal is Proposal => proposal !== null);
+
+      setProposals(parsedProposals);
+    } catch (err) {
+      console.error("Error fetching proposals:", err);
+      setError("Failed to fetch proposals. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProposals();
+  }, [fetchProposals]);
 
   const getStatus = (
     status: ProposalStatus,
@@ -103,32 +110,22 @@ const ProposalFeed: React.FC = () => {
   };
 
   const handleVoteSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ["proposals"] });
+    fetchProposals();
   };
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-10 bg-neutral-800">
       <div className="flex flex-row items-center justify-between space-y-0 pb-6">
         <h1 className="text-2xl font-bold ">Proposals</h1>
-        <Button
-          onClick={() =>
-            queryClient.invalidateQueries({ queryKey: ["proposals"] })
-          }
-          disabled={isLoading}
-          variant="outline"
-        >
+        <Button onClick={fetchProposals} disabled={loading} variant="outline">
           <RefreshCcw className="w-4 h-4 mr-2" />
-          {isLoading ? "Refreshing..." : "Refresh"}
+          {loading ? "Refreshing..." : "Refresh"}
         </Button>
       </div>
 
-      {isError && (
+      {error && (
         <Alert variant="destructive" className="mb-6">
-          <AlertDescription>
-            {error instanceof Error
-              ? error.message
-              : "An error occurred while fetching proposals."}
-          </AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
@@ -139,7 +136,7 @@ const ProposalFeed: React.FC = () => {
           </p>
         </div>
       ) : (
-        proposals.map((proposal: Proposal) => (
+        proposals.map((proposal) => (
           <div
             key={proposal.publicKey}
             className="mb-6 p-4 bg-neutral-800 border border-neutral-600 rounded-md"

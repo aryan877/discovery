@@ -1,5 +1,5 @@
 {
-  "address": "8eCnu6Px3bSjsAdWFN1CYm6y4tYegAJU7Kd5Cy5Tw62R",
+  "address": "EAeyPzTziA1QbpobqkzKF3tSmUXT2WRkahgSkAns8mpz",
   "metadata": {
     "name": "voting_with_delegation",
     "version": "0.1.0",
@@ -9,7 +9,16 @@
   "instructions": [
     {
       "name": "create_proposal",
-      "discriminator": [132, 116, 68, 174, 216, 160, 198, 22],
+      "discriminator": [
+        132,
+        116,
+        68,
+        174,
+        216,
+        160,
+        198,
+        22
+      ],
       "accounts": [
         {
           "name": "voting_state",
@@ -19,7 +28,18 @@
               {
                 "kind": "const",
                 "value": [
-                  118, 111, 116, 105, 110, 103, 95, 115, 116, 97, 116, 101
+                  118,
+                  111,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
                 ]
               }
             ]
@@ -32,7 +52,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [112, 114, 111, 112, 111, 115, 97, 108]
+                "value": [
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
+                  108
+                ]
               },
               {
                 "kind": "account",
@@ -69,7 +98,16 @@
     },
     {
       "name": "delegate",
-      "discriminator": [90, 147, 75, 178, 85, 88, 4, 137],
+      "discriminator": [
+        90,
+        147,
+        75,
+        178,
+        85,
+        88,
+        4,
+        137
+      ],
       "accounts": [
         {
           "name": "user",
@@ -78,7 +116,12 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [117, 115, 101, 114]
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
               },
               {
                 "kind": "account",
@@ -106,7 +149,16 @@
     },
     {
       "name": "finalize_proposal",
-      "discriminator": [23, 68, 51, 167, 109, 173, 187, 164],
+      "discriminator": [
+        23,
+        68,
+        51,
+        167,
+        109,
+        173,
+        187,
+        164
+      ],
       "accounts": [
         {
           "name": "proposal",
@@ -115,7 +167,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [112, 114, 111, 112, 111, 115, 97, 108]
+                "value": [
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
+                  108
+                ]
               },
               {
                 "kind": "account",
@@ -134,7 +195,16 @@
     },
     {
       "name": "initialize",
-      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
       "accounts": [
         {
           "name": "voting_state",
@@ -144,7 +214,18 @@
               {
                 "kind": "const",
                 "value": [
-                  118, 111, 116, 105, 110, 103, 95, 115, 116, 97, 116, 101
+                  118,
+                  111,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
                 ]
               }
             ]
@@ -164,7 +245,16 @@
     },
     {
       "name": "undelegate",
-      "discriminator": [131, 148, 180, 198, 91, 104, 42, 238],
+      "discriminator": [
+        131,
+        148,
+        180,
+        198,
+        91,
+        104,
+        42,
+        238
+      ],
       "accounts": [
         {
           "name": "user",
@@ -173,7 +263,12 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [117, 115, 101, 114]
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
               },
               {
                 "kind": "account",
@@ -191,7 +286,16 @@
     },
     {
       "name": "vote",
-      "discriminator": [227, 110, 155, 23, 136, 126, 172, 25],
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
       "accounts": [
         {
           "name": "proposal",
@@ -200,7 +304,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [112, 114, 111, 112, 111, 115, 97, 108]
+                "value": [
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
+                  108
+                ]
               },
               {
                 "kind": "account",
@@ -217,7 +330,17 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [117, 115, 101, 114, 95, 118, 111, 116, 101]
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
               },
               {
                 "kind": "account",
@@ -226,6 +349,27 @@
               {
                 "kind": "account",
                 "path": "proposal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "voter"
               }
             ]
           }
@@ -255,29 +399,83 @@
   "accounts": [
     {
       "name": "Proposal",
-      "discriminator": [26, 94, 189, 187, 116, 136, 53, 33]
+      "discriminator": [
+        26,
+        94,
+        189,
+        187,
+        116,
+        136,
+        53,
+        33
+      ]
     },
     {
       "name": "User",
-      "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
+      "discriminator": [
+        159,
+        117,
+        95,
+        227,
+        239,
+        151,
+        58,
+        236
+      ]
     },
     {
       "name": "UserVote",
-      "discriminator": [136, 163, 243, 202, 202, 124, 112, 53]
+      "discriminator": [
+        136,
+        163,
+        243,
+        202,
+        202,
+        124,
+        112,
+        53
+      ]
     },
     {
       "name": "VotingState",
-      "discriminator": [96, 6, 102, 202, 44, 29, 199, 133]
+      "discriminator": [
+        96,
+        6,
+        102,
+        202,
+        44,
+        29,
+        199,
+        133
+      ]
     }
   ],
   "events": [
     {
       "name": "ProposalFinalizedEvent",
-      "discriminator": [228, 151, 231, 28, 58, 215, 17, 130]
+      "discriminator": [
+        228,
+        151,
+        231,
+        28,
+        58,
+        215,
+        17,
+        130
+      ]
     },
     {
       "name": "VoteEvent",
-      "discriminator": [195, 71, 250, 105, 120, 119, 234, 134]
+      "discriminator": [
+        195,
+        71,
+        250,
+        105,
+        120,
+        119,
+        234,
+        134
+      ]
     }
   ],
   "errors": [
