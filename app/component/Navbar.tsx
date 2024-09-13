@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import useCanvasWallet from "../CanvasWalletProvider";
+import useCanvasWallet from "../context/CanvasWalletProvider";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,6 +14,7 @@ export const Navbar: React.FC = () => {
     initializeWallet,
     fetchBalance,
     user,
+    disconnectWallet,
   } = useCanvasWallet();
 
   const connectWallet = async () => {
@@ -27,10 +28,6 @@ export const Navbar: React.FC = () => {
     } catch (error) {
       console.error("Error connecting wallet:", error);
     }
-  };
-
-  const disconnectWallet = () => {
-    console.log("Wallet disconnect functionality not implemented");
   };
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import useCanvasWallet from "../CanvasWalletProvider";
+import useCanvasWallet from "../context/CanvasWalletProvider";
 import Link from "next/link";
 import {
   PublicKey,

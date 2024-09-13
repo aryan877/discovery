@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import duration from "dayjs/plugin/duration";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -14,112 +15,106 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ReactMarkdown from "react-markdown";
 import { clusterList } from "@/lib/cluster";
-import { deserializeProposal, Proposal } from "@/lib/proposalUtils";
+import {
+  deserializeProposal,
+  Proposal,
+  ProposalStatus,
+} from "@/lib/proposalUtils";
+import { PROGRAM_ID_STRING } from "@/lib/constants";
+import useCanvasWallet from "@/app/context/CanvasWalletProvider";
 import Back from "@/app/component/Back";
+import VoteButtons from "@/app/component/VoteButtons";
 
 dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 
-const ProposalDetailPage: React.FC = () => {
-  const [proposal, setProposal] = useState<Proposal | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentTime, setCurrentTime] = useState(dayjs());
+const getDevnetConnection = () => {
+  const devnetCluster = clusterList.find((c) => c.name === "Devnet");
+  if (!devnetCluster) throw new Error("Devnet cluster not found");
+  return new Connection(devnetCluster.url, "confirmed");
+};
 
+const fetchProposal = async (proposalAddress: string): Promise<Proposal> => {
+  const connection = getDevnetConnection();
+  const accountInfo = await connection.getAccountInfo(
+    new PublicKey(proposalAddress)
+  );
+
+  if (!accountInfo) {
+    throw new Error("Proposal not found");
+  }
+
+  const parsedProposal = deserializeProposal(proposalAddress, accountInfo.data);
+  if (!parsedProposal) {
+    throw new Error("Failed to parse proposal data");
+  }
+
+  return parsedProposal;
+};
+
+const ProposalDetailPage: React.FC = () => {
+  const [currentTime, setCurrentTime] = useState(dayjs());
   const pathname = usePathname();
-  const address = pathname?.split("/").pop();
+  const proposalAddress = pathname?.split("/").pop() || "";
+  const { address, initializeWallet } = useCanvasWallet();
+  const queryClient = useQueryClient();
+
+  const {
+    data: proposal,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["proposal", proposalAddress],
+    queryFn: () => fetchProposal(proposalAddress),
+    enabled: !!proposalAddress,
+    refetchInterval: 30000,
+  });
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(dayjs()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const fetchProposal = useCallback(async () => {
-    if (!address) return;
-    setLoading(true);
-    setError(null);
-
-    try {
-      const devnetCluster = clusterList.find((c) => c.name === "Devnet");
-      if (!devnetCluster) throw new Error("Devnet cluster not found");
-
-      const connection = new Connection(devnetCluster.url, "confirmed");
-      const accountInfo = await connection.getAccountInfo(
-        new PublicKey(address)
-      );
-
-      if (!accountInfo) {
-        throw new Error("Proposal not found");
+  const getStatus = useCallback(
+    (status: ProposalStatus, startTime: number, endTime: number) => {
+      const now = currentTime.unix();
+      if (status.active && now >= startTime && now < endTime) {
+        return <Badge>Active</Badge>;
       }
+      if (status.passed) return <Badge className="bg-green-500">Passed</Badge>;
+      if (status.rejected)
+        return <Badge className="bg-red-500">Rejected</Badge>;
+      if (now < startTime)
+        return <Badge className="bg-yellow-500">Upcoming</Badge>;
+      if (now >= endTime) return <Badge className="bg-gray-500">Ended</Badge>;
+      return <Badge>Unknown</Badge>;
+    },
+    [currentTime]
+  );
 
-      const parsedProposal = deserializeProposal(address, accountInfo.data);
-      if (!parsedProposal) {
-        throw new Error("Failed to parse proposal data");
-      }
+  const getTimeRemaining = useCallback(
+    (endTime: number) => {
+      const end = dayjs.unix(endTime);
+      const diff = end.diff(currentTime);
+      if (diff <= 0) return "Ended";
 
-      setProposal(parsedProposal);
-    } catch (err) {
-      console.error("Error fetching proposal:", err);
-      setError("Failed to fetch proposal. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  }, [address]);
+      const duration = dayjs.duration(diff);
+      return `${duration.days()}d ${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`;
+    },
+    [currentTime]
+  );
 
-  useEffect(() => {
-    fetchProposal();
-  }, [fetchProposal]);
-
-  const getStatus = (
-    status: Proposal["account"]["status"],
-    startTime: bigint,
-    endTime: bigint
-  ) => {
-    if (
-      status.active &&
-      currentTime.isAfter(dayjs(Number(startTime) * 1000)) &&
-      currentTime.isBefore(dayjs(Number(endTime) * 1000))
-    ) {
-      return <Badge>Active</Badge>;
-    }
-    if (status.passed) return <Badge className="bg-green-500">Passed</Badge>;
-    if (status.rejected) return <Badge className="bg-red-500">Rejected</Badge>;
-    if (currentTime.isBefore(dayjs(Number(startTime) * 1000)))
-      return <Badge className="bg-yellow-500">Upcoming</Badge>;
-    if (currentTime.isAfter(dayjs(Number(endTime) * 1000)))
-      return <Badge className="bg-gray-500">Ended</Badge>;
-    return <Badge>Unknown</Badge>;
-  };
-
-  const getTimeRemaining = (endTime: bigint) => {
-    const end = dayjs(Number(endTime) * 1000);
-    if (!end.isValid()) return "Invalid date";
-
-    const diff = end.diff(currentTime);
-    if (diff <= 0) return "Ended";
-
-    const duration = dayjs.duration(diff);
-    return `${duration.days()}d ${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`;
-  };
-
-  const calculateProgress = (yesVotes: bigint, noVotes: bigint) => {
+  const calculateProgress = useCallback((yesVotes: bigint, noVotes: bigint) => {
     const total = Number(yesVotes) + Number(noVotes);
     return total === 0 ? 0 : (Number(yesVotes) / total) * 100;
-  };
+  }, []);
 
-  const isActive = (startTime: bigint, endTime: bigint): boolean => {
-    const start = dayjs(Number(startTime) * 1000);
-    const end = dayjs(Number(endTime) * 1000);
-    return (
-      start.isValid() &&
-      end.isValid() &&
-      currentTime.isAfter(start) &&
-      currentTime.isBefore(end)
-    );
-  };
+  const handleVoteSuccess = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["proposal", proposalAddress] });
+  }, [queryClient, proposalAddress]);
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center mt-10">Loading...</div>;
   }
 
@@ -127,7 +122,7 @@ const ProposalDetailPage: React.FC = () => {
     return (
       <Alert variant="destructive" className="mt-10 max-w-2xl mx-auto">
         <AlertDescription>
-          {error || "Failed to load proposal"}
+          {error instanceof Error ? error.message : "Failed to load proposal"}
         </AlertDescription>
       </Alert>
     );
@@ -171,17 +166,17 @@ const ProposalDetailPage: React.FC = () => {
           <div className="flex justify-between">
             <span>Start Date:</span>
             <span>
-              {dayjs(Number(proposal.account.startTime) * 1000).format(
-                "MMM D, YYYY h:mm A"
-              )}
+              {dayjs
+                .unix(proposal.account.startTime)
+                .format("MMM D, YYYY h:mm A")}
             </span>
           </div>
           <div className="flex justify-between">
             <span>End Date:</span>
             <span>
-              {dayjs(Number(proposal.account.endTime) * 1000).format(
-                "MMM D, YYYY h:mm A"
-              )}
+              {dayjs
+                .unix(proposal.account.endTime)
+                .format("MMM D, YYYY h:mm A")}
             </span>
           </div>
           <div className="flex justify-between">
@@ -208,28 +203,17 @@ const ProposalDetailPage: React.FC = () => {
           )}
           className="h-2 mb-4"
         />
-        <div className="flex justify-center space-x-4">
+        {address ? (
+          <VoteButtons proposal={proposal} onVoteSuccess={handleVoteSuccess} />
+        ) : (
           <Button
-            disabled={
-              !isActive(proposal.account.startTime, proposal.account.endTime) ||
-              !proposal.account.status.active
-            }
-            className="w-full"
-            variant="default"
-          >
-            Yes, proceed
-          </Button>
-          <Button
-            disabled={
-              !isActive(proposal.account.startTime, proposal.account.endTime) ||
-              !proposal.account.status.active
-            }
-            className="w-full"
+            onClick={initializeWallet}
             variant="outline"
+            className="rounded-md w-full"
           >
-            Do not proceed
+            Connect Wallet
           </Button>
-        </div>
+        )}
       </div>
     </div>
   );

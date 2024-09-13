@@ -1,7 +1,7 @@
 {
-  "address": "4mHTnazT4bQjn88F7Aq5f8dsdkVP5kyX5QgtBDwRxU11",
+  "address": "8eCnu6Px3bSjsAdWFN1CYm6y4tYegAJU7Kd5Cy5Tw62R",
   "metadata": {
-    "name": "liquid_quadratic_governance",
+    "name": "voting_with_delegation",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
@@ -12,13 +12,15 @@
       "discriminator": [132, 116, 68, 174, 216, 160, 198, 22],
       "accounts": [
         {
-          "name": "governance",
+          "name": "voting_state",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
+                "value": [
+                  118, 111, 116, 105, 110, 103, 95, 115, 116, 97, 116, 101
+                ]
               }
             ]
           }
@@ -34,8 +36,8 @@
               },
               {
                 "kind": "account",
-                "path": "governance.proposal_count",
-                "account": "Governance"
+                "path": "voting_state.proposal_count",
+                "account": "VotingState"
               }
             ]
           }
@@ -87,7 +89,12 @@
         },
         {
           "name": "delegator_authority",
+          "writable": true,
           "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -119,17 +126,6 @@
           }
         },
         {
-          "name": "governance",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
-              }
-            ]
-          }
-        },
-        {
           "name": "finalizer",
           "signer": true
         }
@@ -141,19 +137,21 @@
       "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
       "accounts": [
         {
-          "name": "governance",
+          "name": "voting_state",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
+                "value": [
+                  118, 111, 116, 105, 110, 103, 95, 115, 116, 97, 116, 101
+                ]
               }
             ]
           }
         },
         {
-          "name": "admin",
+          "name": "authority",
           "writable": true,
           "signer": true
         },
@@ -163,61 +161,6 @@
         }
       ],
       "args": []
-    },
-    {
-      "name": "initialize_user",
-      "discriminator": [111, 17, 185, 250, 60, 122, 38, 254],
-      "accounts": [
-        {
-          "name": "user",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [117, 115, 101, 114]
-              },
-              {
-                "kind": "account",
-                "path": "user_authority"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user_authority",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "admin",
-          "writable": true,
-          "signer": true,
-          "relations": ["governance"]
-        },
-        {
-          "name": "governance",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [103, 111, 118, 101, 114, 110, 97, 110, 99, 101]
-              }
-            ]
-          }
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "initial_base_power",
-          "type": "u64"
-        }
-      ]
     },
     {
       "name": "undelegate",
@@ -268,24 +211,33 @@
           }
         },
         {
-          "name": "voter",
+          "name": "user_vote",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [117, 115, 101, 114]
+                "value": [117, 115, 101, 114, 95, 118, 111, 116, 101]
               },
               {
                 "kind": "account",
-                "path": "voter_authority"
+                "path": "voter"
+              },
+              {
+                "kind": "account",
+                "path": "proposal"
               }
             ]
           }
         },
         {
-          "name": "voter_authority",
+          "name": "voter",
+          "writable": true,
           "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -296,19 +248,11 @@
               "name": "VoteType"
             }
           }
-        },
-        {
-          "name": "voting_power",
-          "type": "u64"
         }
       ]
     }
   ],
   "accounts": [
-    {
-      "name": "Governance",
-      "discriminator": [18, 143, 88, 13, 73, 217, 47, 49]
-    },
     {
       "name": "Proposal",
       "discriminator": [26, 94, 189, 187, 116, 136, 53, 33]
@@ -316,6 +260,14 @@
     {
       "name": "User",
       "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
+    },
+    {
+      "name": "UserVote",
+      "discriminator": [136, 163, 243, 202, 202, 124, 112, 53]
+    },
+    {
+      "name": "VotingState",
+      "discriminator": [96, 6, 102, 202, 44, 29, 199, 133]
     }
   ],
   "events": [
@@ -331,13 +283,13 @@
   "errors": [
     {
       "code": 6000,
-      "name": "NumericalOverflow",
-      "msg": "Numerical overflow occurred"
+      "name": "ProposalNotActive",
+      "msg": "Proposal is not active"
     },
     {
       "code": 6001,
-      "name": "ProposalNotActive",
-      "msg": "Proposal is not active"
+      "name": "VotingPeriodNotStarted",
+      "msg": "Voting period has not started yet"
     },
     {
       "code": 6002,
@@ -356,8 +308,8 @@
     },
     {
       "code": 6005,
-      "name": "AlreadyDelegated",
-      "msg": "User has already delegated their voting power"
+      "name": "AlreadyVoted",
+      "msg": "User has already voted on this proposal"
     },
     {
       "code": 6006,
@@ -366,26 +318,6 @@
     }
   ],
   "types": [
-    {
-      "name": "Governance",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "admin",
-            "type": "pubkey"
-          },
-          {
-            "name": "proposal_count",
-            "type": "u64"
-          },
-          {
-            "name": "total_base_power",
-            "type": "u64"
-          }
-        ]
-      }
-    },
     {
       "name": "Proposal",
       "type": {
@@ -485,21 +417,31 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "base_power",
-            "type": "u64"
-          },
-          {
-            "name": "reputation",
-            "type": "u8"
-          },
-          {
-            "name": "last_vote_time",
-            "type": "i64"
-          },
-          {
             "name": "delegated_to",
             "type": {
               "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserVote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "has_voted",
+            "type": "bool"
+          },
+          {
+            "name": "vote_type",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "VoteType"
+                }
+              }
             }
           }
         ]
@@ -525,14 +467,6 @@
                 "name": "VoteType"
               }
             }
-          },
-          {
-            "name": "voting_power",
-            "type": "u64"
-          },
-          {
-            "name": "original_voting_power",
-            "type": "u64"
           }
         ]
       }
@@ -547,6 +481,18 @@
           },
           {
             "name": "No"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VotingState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_count",
+            "type": "u64"
           }
         ]
       }

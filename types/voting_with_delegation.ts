@@ -2,12 +2,12 @@
  * Program IDL in camelCase format in order to be used in JS/TS.
  *
  * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/liquid_quadratic_governance.json`.
+ * IDL can be found at `target/idl/voting_with_delegation.json`.
  */
-export type LiquidQuadraticGovernance = {
-  address: "AEpEkRkBqLz8BwqENLG1eYU82JPqUWrRGNqRmQmpiMao";
+export type VotingWithDelegation = {
+  address: "8eCnu6Px3bSjsAdWFN1CYm6y4tYegAJU7Kd5Cy5Tw62R";
   metadata: {
-    name: "liquidQuadraticGovernance";
+    name: "votingWithDelegation";
     version: "0.1.0";
     spec: "0.1.0";
     description: "Created with Anchor";
@@ -18,13 +18,26 @@ export type LiquidQuadraticGovernance = {
       discriminator: [132, 116, 68, 174, 216, 160, 198, 22];
       accounts: [
         {
-          name: "governance";
+          name: "votingState";
           writable: true;
           pda: {
             seeds: [
               {
                 kind: "const";
-                value: [103, 111, 118, 101, 114, 110, 97, 110, 99, 101];
+                value: [
+                  118,
+                  111,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ];
               }
             ];
           };
@@ -40,8 +53,8 @@ export type LiquidQuadraticGovernance = {
               },
               {
                 kind: "account";
-                path: "governance.proposal_count";
-                account: "governance";
+                path: "voting_state.proposal_count";
+                account: "votingState";
               }
             ];
           };
@@ -93,7 +106,12 @@ export type LiquidQuadraticGovernance = {
         },
         {
           name: "delegatorAuthority";
+          writable: true;
           signer: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         }
       ];
       args: [
@@ -125,17 +143,6 @@ export type LiquidQuadraticGovernance = {
           };
         },
         {
-          name: "governance";
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [103, 111, 118, 101, 114, 110, 97, 110, 99, 101];
-              }
-            ];
-          };
-        },
-        {
           name: "finalizer";
           signer: true;
         }
@@ -147,19 +154,32 @@ export type LiquidQuadraticGovernance = {
       discriminator: [175, 175, 109, 31, 13, 152, 155, 237];
       accounts: [
         {
-          name: "governance";
+          name: "votingState";
           writable: true;
           pda: {
             seeds: [
               {
                 kind: "const";
-                value: [103, 111, 118, 101, 114, 110, 97, 110, 99, 101];
+                value: [
+                  118,
+                  111,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ];
               }
             ];
           };
         },
         {
-          name: "admin";
+          name: "authority";
           writable: true;
           signer: true;
         },
@@ -169,61 +189,6 @@ export type LiquidQuadraticGovernance = {
         }
       ];
       args: [];
-    },
-    {
-      name: "initializeUser";
-      discriminator: [111, 17, 185, 250, 60, 122, 38, 254];
-      accounts: [
-        {
-          name: "user";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [117, 115, 101, 114];
-              },
-              {
-                kind: "account";
-                path: "userAuthority";
-              }
-            ];
-          };
-        },
-        {
-          name: "userAuthority";
-          writable: true;
-          signer: true;
-        },
-        {
-          name: "admin";
-          writable: true;
-          signer: true;
-          relations: ["governance"];
-        },
-        {
-          name: "governance";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "const";
-                value: [103, 111, 118, 101, 114, 110, 97, 110, 99, 101];
-              }
-            ];
-          };
-        },
-        {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
-        }
-      ];
-      args: [
-        {
-          name: "initialBasePower";
-          type: "u64";
-        }
-      ];
     },
     {
       name: "undelegate";
@@ -274,24 +239,33 @@ export type LiquidQuadraticGovernance = {
           };
         },
         {
-          name: "voter";
+          name: "userVote";
           writable: true;
           pda: {
             seeds: [
               {
                 kind: "const";
-                value: [117, 115, 101, 114];
+                value: [117, 115, 101, 114, 95, 118, 111, 116, 101];
               },
               {
                 kind: "account";
-                path: "voterAuthority";
+                path: "voter";
+              },
+              {
+                kind: "account";
+                path: "proposal";
               }
             ];
           };
         },
         {
-          name: "voterAuthority";
+          name: "voter";
+          writable: true;
           signer: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         }
       ];
       args: [
@@ -302,19 +276,11 @@ export type LiquidQuadraticGovernance = {
               name: "voteType";
             };
           };
-        },
-        {
-          name: "votingPower";
-          type: "u64";
         }
       ];
     }
   ];
   accounts: [
-    {
-      name: "governance";
-      discriminator: [18, 143, 88, 13, 73, 217, 47, 49];
-    },
     {
       name: "proposal";
       discriminator: [26, 94, 189, 187, 116, 136, 53, 33];
@@ -322,6 +288,14 @@ export type LiquidQuadraticGovernance = {
     {
       name: "user";
       discriminator: [159, 117, 95, 227, 239, 151, 58, 236];
+    },
+    {
+      name: "userVote";
+      discriminator: [136, 163, 243, 202, 202, 124, 112, 53];
+    },
+    {
+      name: "votingState";
+      discriminator: [96, 6, 102, 202, 44, 29, 199, 133];
     }
   ];
   events: [
@@ -337,13 +311,13 @@ export type LiquidQuadraticGovernance = {
   errors: [
     {
       code: 6000;
-      name: "numericalOverflow";
-      msg: "Numerical overflow occurred";
+      name: "proposalNotActive";
+      msg: "Proposal is not active";
     },
     {
       code: 6001;
-      name: "proposalNotActive";
-      msg: "Proposal is not active";
+      name: "votingPeriodNotStarted";
+      msg: "Voting period has not started yet";
     },
     {
       code: 6002;
@@ -362,8 +336,8 @@ export type LiquidQuadraticGovernance = {
     },
     {
       code: 6005;
-      name: "alreadyDelegated";
-      msg: "User has already delegated their voting power";
+      name: "alreadyVoted";
+      msg: "User has already voted on this proposal";
     },
     {
       code: 6006;
@@ -372,26 +346,6 @@ export type LiquidQuadraticGovernance = {
     }
   ];
   types: [
-    {
-      name: "governance";
-      type: {
-        kind: "struct";
-        fields: [
-          {
-            name: "admin";
-            type: "pubkey";
-          },
-          {
-            name: "proposalCount";
-            type: "u64";
-          },
-          {
-            name: "totalBasePower";
-            type: "u64";
-          }
-        ];
-      };
-    },
     {
       name: "proposal";
       type: {
@@ -491,21 +445,31 @@ export type LiquidQuadraticGovernance = {
         kind: "struct";
         fields: [
           {
-            name: "basePower";
-            type: "u64";
-          },
-          {
-            name: "reputation";
-            type: "u8";
-          },
-          {
-            name: "lastVoteTime";
-            type: "i64";
-          },
-          {
             name: "delegatedTo";
             type: {
               option: "pubkey";
+            };
+          }
+        ];
+      };
+    },
+    {
+      name: "userVote";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "hasVoted";
+            type: "bool";
+          },
+          {
+            name: "voteType";
+            type: {
+              option: {
+                defined: {
+                  name: "voteType";
+                };
+              };
             };
           }
         ];
@@ -531,14 +495,6 @@ export type LiquidQuadraticGovernance = {
                 name: "voteType";
               };
             };
-          },
-          {
-            name: "votingPower";
-            type: "u64";
-          },
-          {
-            name: "originalVotingPower";
-            type: "u64";
           }
         ];
       };
@@ -553,6 +509,18 @@ export type LiquidQuadraticGovernance = {
           },
           {
             name: "no";
+          }
+        ];
+      };
+    },
+    {
+      name: "votingState";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "proposalCount";
+            type: "u64";
           }
         ];
       };

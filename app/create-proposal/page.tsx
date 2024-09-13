@@ -21,9 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Textarea } from "@/components/ui/textarea";
 import { RefreshCcw } from "lucide-react";
-import useCanvasWallet from "../CanvasWalletProvider";
+import useCanvasWallet from "../context/CanvasWalletProvider";
 import { clusterList } from "@/lib/cluster";
 import { PROGRAM_ID_STRING } from "@/lib/constants";
 import Back from "../component/Back";
@@ -47,9 +46,9 @@ const CreateProposal: React.FC = () => {
   }, [client]);
 
   const createProposalInstruction = (
-    governancePDA: PublicKey,
+    votingStatePDA: PublicKey,
     proposalPDA: PublicKey,
-    userPubkey: PublicKey,
+    proposerPubkey: PublicKey,
     title: string,
     description: string,
     votingPeriodSeconds: number
@@ -78,9 +77,9 @@ const CreateProposal: React.FC = () => {
 
     return new TransactionInstruction({
       keys: [
-        { pubkey: governancePDA, isSigner: false, isWritable: true },
+        { pubkey: votingStatePDA, isSigner: false, isWritable: true },
         { pubkey: proposalPDA, isSigner: false, isWritable: true },
-        { pubkey: userPubkey, isSigner: true, isWritable: true },
+        { pubkey: proposerPubkey, isSigner: true, isWritable: true },
         { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
       ],
       programId: PROGRAM_ID,
@@ -118,22 +117,24 @@ const CreateProposal: React.FC = () => {
             throw new Error("Failed to connect wallet");
           }
 
-          const userPubkey = new PublicKey(connectResponse.untrusted.address);
+          const proposerPubkey = new PublicKey(
+            connectResponse.untrusted.address
+          );
           const connection = new Connection(devnetCluster.url, "confirmed");
 
-          const [governancePDA] = PublicKey.findProgramAddressSync(
-            [Buffer.from("governance")],
+          const [votingStatePDA] = PublicKey.findProgramAddressSync(
+            [Buffer.from("voting_state")],
             PROGRAM_ID
           );
 
-          const governanceAccount = await connection.getAccountInfo(
-            governancePDA
+          const votingStateAccount = await connection.getAccountInfo(
+            votingStatePDA
           );
-          if (!governanceAccount) {
-            throw new Error("Governance account not found");
+          if (!votingStateAccount) {
+            throw new Error("Voting state account not found");
           }
           const proposalCount = new BN(
-            governanceAccount.data.slice(40, 48),
+            votingStateAccount.data.slice(8, 16),
             "le"
           );
 
@@ -150,9 +151,9 @@ const CreateProposal: React.FC = () => {
           );
 
           const instruction = createProposalInstruction(
-            governancePDA,
+            votingStatePDA,
             proposalPDA,
-            userPubkey,
+            proposerPubkey,
             title,
             description,
             votingPeriodSeconds
@@ -161,7 +162,7 @@ const CreateProposal: React.FC = () => {
           const { blockhash } = await connection.getLatestBlockhash();
 
           const messageV0 = new TransactionMessage({
-            payerKey: userPubkey,
+            payerKey: proposerPubkey,
             recentBlockhash: blockhash,
             instructions: [instruction],
           }).compileToV0Message();

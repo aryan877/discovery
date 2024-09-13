@@ -14,8 +14,8 @@ export interface ProposalAccount {
   yesVotes: bigint;
   noVotes: bigint;
   status: ProposalStatus;
-  startTime: bigint;
-  endTime: bigint;
+  startTime: number;
+  endTime: number;
 }
 
 export interface Proposal {
@@ -35,7 +35,7 @@ export function deserializeProposal(
       return null;
     }
 
-    let offset = 8; // Start after the discriminator
+    let offset = 8;
 
     // ID (u64)
     const id = accountData.readBigUInt64LE(offset);
@@ -77,11 +77,11 @@ export function deserializeProposal(
     offset += 1;
 
     // Start Time (i64)
-    const startTime = accountData.readBigInt64LE(offset);
+    const startTime = Number(accountData.readBigInt64LE(offset));
     offset += 8;
 
     // End Time (i64)
-    const endTime = accountData.readBigInt64LE(offset);
+    const endTime = Number(accountData.readBigInt64LE(offset));
 
     return {
       publicKey,

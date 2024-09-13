@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { CanvasWalletProvider } from "./CanvasWalletProvider";
+import { CanvasWalletProvider } from "./context/CanvasWalletProvider";
 import { ApolloWrapper } from "@/lib/apolloClient";
 import { Navbar } from "./component/Navbar";
+import ReactQueryProvider from "./context/ReactQueryProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,12 +36,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ApolloWrapper>
-          <CanvasWalletProvider>
-            <Navbar />
-            <div className="mb-10">{children}</div>
-          </CanvasWalletProvider>
-        </ApolloWrapper>
+        <ReactQueryProvider>
+          <ApolloWrapper>
+            <CanvasWalletProvider>
+              <Navbar />
+              <div className="mb-10">{children}</div>
+            </CanvasWalletProvider>
+          </ApolloWrapper>
+        </ReactQueryProvider>
       </body>
     </html>
   );

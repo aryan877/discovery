@@ -30,6 +30,7 @@ interface CanvasWalletState {
 interface CanvasWalletContextValue extends CanvasWalletState {
   isIframe: boolean;
   initializeWallet: () => Promise<void>;
+  disconnectWallet: () => void;
   executeTransaction: (tx: Transaction) => Promise<any | null>;
   fetchBalance: () => Promise<void>;
 }
@@ -113,6 +114,14 @@ export const CanvasWalletProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const disconnectWallet = () => {
+    setState((prev) => ({
+      ...initialState,
+      client: prev.client,
+    }));
+    console.log("Wallet disconnected");
+  };
+
   const executeTransaction = async (transaction: Transaction) => {
     if (!state.client || !state.address) {
       console.error("Client or wallet address unavailable");
@@ -186,6 +195,7 @@ export const CanvasWalletProvider: React.FC<{ children: React.ReactNode }> = ({
     ...state,
     isIframe,
     initializeWallet,
+    disconnectWallet,
     executeTransaction,
     fetchBalance,
   };
