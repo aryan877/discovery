@@ -7,7 +7,7 @@ import ProposalFeed from "./component/ProposalFeed";
 
 function Home() {
   return (
-    <div className="bg-neutral-800 text-white">
+    <div className="bg-neutral-800 ">
       <div className="max-w-2xl mx-auto py-4 px-4">
         <div className="flex justify-end space-x-4 mb-6">
           <Link href="/create-proposal" passHref>

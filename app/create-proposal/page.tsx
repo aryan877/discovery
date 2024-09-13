@@ -198,7 +198,7 @@ const CreateProposal: React.FC = () => {
   return (
     <div className="w-full max-w-2xl mx-auto mt-10">
       <Back />
-      <h1 className="text-2xl font-bold mb-6 text-white">Create Proposal</h1>
+      <h1 className="text-2xl font-bold mb-6 ">Create Proposal</h1>
 
       {errorMessage && (
         <Alert variant="destructive" className="mb-6">
@@ -214,12 +214,12 @@ const CreateProposal: React.FC = () => {
 
       <Card className="bg-neutral-800 border-neutral-600">
         <CardHeader>
-          <h2 className="text-xl font-semibold text-white">New Proposal</h2>
+          <h2 className="text-xl font-semibold ">New Proposal</h2>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreateProposal} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm text-white">
+              <Label htmlFor="title" className="text-sm ">
                 Proposal Title
               </Label>
               <Input
@@ -228,11 +228,11 @@ const CreateProposal: React.FC = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter proposal title"
                 required
-                className="text-white border-neutral-600"
+                className=" border-neutral-600"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm text-white">
+              <Label htmlFor="description" className="text-sm ">
                 Proposal Description
               </Label>
               <RichTextEditor
@@ -242,7 +242,7 @@ const CreateProposal: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="votingPeriodHours" className="text-sm text-white">
+              <Label htmlFor="votingPeriodHours" className="text-sm ">
                 Voting Period (hours)
               </Label>
               <Input
@@ -254,7 +254,7 @@ const CreateProposal: React.FC = () => {
                 onChange={(e) => setVotingPeriodHours(e.target.value)}
                 placeholder="Enter voting period"
                 required
-                className="text-white border-neutral-600"
+                className=" border-neutral-600"
               />
             </div>
           </form>
@@ -266,7 +266,7 @@ const CreateProposal: React.FC = () => {
               isProcessing || !title || !description || !votingPeriodHours
             }
             variant="outline"
-            className="w-full text-white"
+            className="w-full "
           >
             {isProcessing ? (
               <>

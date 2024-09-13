@@ -12,6 +12,7 @@ import { RefreshCcw } from "lucide-react";
 import { clusterList } from "@/lib/cluster";
 import { PROGRAM_ID_STRING } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
+import ReactMarkdown from "react-markdown";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -26,6 +27,11 @@ dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 
 const PROGRAM_ID_PK = new PublicKey(PROGRAM_ID_STRING);
+
+const truncateText = (text: string, maxLength: number) => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).trim() + "...";
+};
 
 const ProposalFeed: React.FC = () => {
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -122,7 +128,7 @@ const ProposalFeed: React.FC = () => {
   return (
     <div className="w-full max-w-2xl mx-auto mt-10 bg-neutral-800">
       <div className="flex flex-row items-center justify-between space-y-0 pb-6">
-        <h1 className="text-2xl font-bold text-white">Proposal Feed</h1>
+        <h1 className="text-2xl font-bold ">Proposal Feed</h1>
         <Button onClick={fetchProposals} disabled={loading} variant="outline">
           <RefreshCcw className="w-4 h-4 mr-2" />
           {loading ? "Refreshing..." : "Refresh"}
@@ -168,7 +174,11 @@ const ProposalFeed: React.FC = () => {
               )}
             </div>
           </div>
-          <p className="mb-2">{proposal.account.description}</p>
+          <div className="mb-2">
+            <ReactMarkdown>
+              {truncateText(proposal.account.description, 200)}
+            </ReactMarkdown>
+          </div>
           <div className="flex justify-between mb-1">
             <span className="font-medium">
               For: {proposal.account.yesVotes.toString()}

@@ -14,6 +14,7 @@ import { Markdown } from "tiptap-markdown";
 import { Link } from "@tiptap/extension-link";
 import classNames from "classnames";
 import { ToggleProps } from "@radix-ui/react-toggle";
+import React from "react";
 
 interface ToolbarToggleProps extends Omit<ToggleProps, "type"> {
   children: React.ReactNode;
@@ -32,7 +33,7 @@ const RichTextEditor = ({
     editorProps: {
       attributes: {
         class: classNames(
-          "min-h-[150px] w-full px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y",
+          "min-h-[150px] w-full px-3 py-2 text-sm  placeholder:text-neutral-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y",
           { "opacity-50 cursor-not-allowed": disabled }
         ),
       },
@@ -176,10 +177,13 @@ const ToolbarToggle: React.FC<ToolbarToggleProps> = ({
 }) => (
   <Toggle
     size="sm"
-    className="text-white hover:bg-white hover:text-neutral-800 data-[state=on]:bg-white data-[state=on]:text-neutral-800"
+    className="hover:bg-white hover:text-neutral-800 data-[state=on]:bg-white data-[state=on]:text-neutral-800 group"
     {...props}
   >
-    {children}
+    {React.cloneElement(children as React.ReactElement, {
+      className:
+        "h-4 w-4 group-hover:text-neutral-800 group-data-[state=on]:text-neutral-800",
+    })}
   </Toggle>
 );
 

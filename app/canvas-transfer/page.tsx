@@ -149,7 +149,7 @@ const CanvasSolanaTransfer: React.FC = () => {
   return (
     <div className="w-full max-w-2xl mx-auto mt-10">
       <Back />
-      <h1 className="text-2xl font-bold mb-6 text-white">Solana Transfer</h1>
+      <h1 className="text-2xl font-bold mb-6">Solana Transfer</h1>
 
       {errorMessage && (
         <Alert variant="destructive" className="mb-6">
@@ -166,15 +166,10 @@ const CanvasSolanaTransfer: React.FC = () => {
       <Card className="bg-neutral-800 border-neutral-600">
         <CardHeader className="flex flex-col gap-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-white">
-              Send Transaction
-            </h2>
+            <h2 className="text-xl font-semibold">Send Transaction</h2>
             {user && (
               <Link href={`/profile/${user.username}`} passHref>
-                <Button
-                  variant="outline"
-                  className="text-white border-neutral-600"
-                >
+                <Button variant="outline" className=" border-neutral-600">
                   View Profile
                 </Button>
               </Link>
@@ -190,7 +185,7 @@ const CanvasSolanaTransfer: React.FC = () => {
                     ? "default"
                     : "outline"
                 }
-                className="mx-1 text-white border-neutral-600"
+                className="mx-1  border-neutral-600"
               >
                 {clusterItem.name}
               </Button>
@@ -201,17 +196,17 @@ const CanvasSolanaTransfer: React.FC = () => {
           <form onSubmit={sendTransaction} className="space-y-4">
             {sourceAddress && (
               <div className="space-y-2">
-                <Label className="text-sm text-white">Source Address</Label>
+                <Label className="text-sm ">Source Address</Label>
                 <Input
                   type="text"
                   value={sourceAddress}
                   readOnly
-                  className="text-white border-neutral-600 bg-neutral-700"
+                  className=" border-neutral-600 bg-neutral-700"
                 />
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="target" className="text-sm text-white">
+              <Label htmlFor="target" className="text-sm ">
                 Target Address
               </Label>
               <Input
@@ -221,11 +216,11 @@ const CanvasSolanaTransfer: React.FC = () => {
                 onChange={(e) => setTargetAddress(e.target.value)}
                 placeholder="Enter target address"
                 required
-                className="text-white border-neutral-600"
+                className=" border-neutral-600"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount" className="text-sm text-white">
+              <Label htmlFor="amount" className="text-sm ">
                 Amount (SOL)
               </Label>
               <Input
@@ -236,7 +231,7 @@ const CanvasSolanaTransfer: React.FC = () => {
                 placeholder="Enter amount"
                 step="0.000000001"
                 required
-                className="text-white border-neutral-600"
+                className=" border-neutral-600"
               />
             </div>
           </form>
@@ -246,7 +241,7 @@ const CanvasSolanaTransfer: React.FC = () => {
             onClick={sendTransaction}
             disabled={isProcessing || !targetAddress || !amount}
             variant="outline"
-            className={`text-white border-neutral-600 ${
+            className={` border-neutral-600 ${
               clusterInfo.cluster === "mainnet-beta"
                 ? "bg-red-600 hover:bg-red-700 border-none"
                 : ""

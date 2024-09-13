@@ -38,7 +38,7 @@ export default function RootLayout({
         <ApolloWrapper>
           <CanvasWalletProvider>
             <Navbar />
-            {children}
+            <div className="mb-10">{children}</div>
           </CanvasWalletProvider>
         </ApolloWrapper>
       </body>
