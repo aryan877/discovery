@@ -2,10 +2,8 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { useQuery, gql } from "@apollo/client";
 import {
-  ArrowLeft,
   Users,
   UserPlus,
   MessageSquare,
@@ -13,9 +11,8 @@ import {
   Award,
   Wallet,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Back from "@/app/component/Back";

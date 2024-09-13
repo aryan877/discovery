@@ -99,9 +99,9 @@ export const CanvasWalletProvider: React.FC<{ children: React.ReactNode }> = ({
       ) {
         setState((prev) => ({
           ...prev,
-          // @ts-ignore
+          // @ts-expect-error
           address: response.untrusted.address,
-          // @ts-ignore
+          // @ts-expect-error
           icon: response.untrusted.walletIcon,
         }));
         console.log("Wallet initialized:", response.untrusted.address);

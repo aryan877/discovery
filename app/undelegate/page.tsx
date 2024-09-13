@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   PublicKey,
   Connection,
   TransactionInstruction,
-  SystemProgram,
   VersionedTransaction,
   TransactionMessage,
 } from "@solana/web3.js";

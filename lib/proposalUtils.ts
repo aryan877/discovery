@@ -1,9 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 
 export interface ProposalStatus {
-  active?: {};
-  passed?: {};
-  rejected?: {};
+  active?: Record<string, never>;
+  passed?: Record<string, never>;
+  rejected?: Record<string, never>;
 }
 
 export interface ProposalAccount {

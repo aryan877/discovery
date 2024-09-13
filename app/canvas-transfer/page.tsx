@@ -73,7 +73,6 @@ const CanvasSolanaTransfer: React.FC = () => {
   };
 
   const createTx = async (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     connectResponse: any
   ): Promise<{ unsignedTx: string } | undefined> => {
     if (!connectResponse.untrusted.success) {
