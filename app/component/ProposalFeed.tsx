@@ -177,10 +177,10 @@ const ProposalFeed: React.FC = () => {
             </div>
             <div className="flex justify-between mb-1">
               <span className="font-medium">
-                For: {proposal.account.yesVotes.toString()}
+                Votes For: {proposal.account.yesVotes.toString()}
               </span>
               <span className="font-medium">
-                Against: {proposal.account.noVotes.toString()}
+                Votes Against: {proposal.account.noVotes.toString()}
               </span>
             </div>
             <Progress
