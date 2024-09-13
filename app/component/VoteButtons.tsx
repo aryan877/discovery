@@ -55,7 +55,7 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
 
       const accountInfo = await connection.getAccountInfo(userVotePDA);
       if (accountInfo && accountInfo.data.length > 0) {
-        const voteType = accountInfo.data[1];
+        const voteType = accountInfo.data[accountInfo.data.length - 1];
         setUserVote(voteType === 0 ? "Yes" : "No");
       } else {
         setUserVote(null);
@@ -94,18 +94,12 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
         PROGRAM_ID
       );
 
-      const [userPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from("user"), new PublicKey(address).toBuffer()],
-        PROGRAM_ID
-      );
-
       const proposalPDA = new PublicKey(proposal.publicKey);
 
       const instruction = new TransactionInstruction({
         keys: [
           { pubkey: proposalPDA, isSigner: false, isWritable: true },
           { pubkey: userVotePDA, isSigner: false, isWritable: true },
-          { pubkey: userPDA, isSigner: false, isWritable: true },
           { pubkey: new PublicKey(address), isSigner: true, isWritable: true },
           {
             pubkey: SystemProgram.programId,
