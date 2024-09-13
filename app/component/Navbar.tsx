@@ -1,47 +1,61 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import useCanvasWallet from "../CanvasWalletProvider";
-import { useWalletBalance } from "../hooks/useWalletBalance";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 export const Navbar: React.FC = () => {
-  const { client: canvasClient } = useCanvasWallet();
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const balance = useWalletBalance(walletAddress);
+  const {
+    client: canvasClient,
+    address: walletAddress,
+    balance,
+    initializeWallet,
+    fetchBalance,
+  } = useCanvasWallet();
 
   const connectWallet = async () => {
-    if (!canvasClient) return;
+    if (!canvasClient) {
+      console.error("Canvas client not initialized");
+      return;
+    }
 
     try {
-      const response = await canvasClient.connectWallet("solana:101");
-      if (response.untrusted.success) {
-        setWalletAddress(response.untrusted.address);
-      } else {
-        console.error("Failed to connect wallet:", response.untrusted.error);
-      }
+      await initializeWallet();
     } catch (error) {
       console.error("Error connecting wallet:", error);
     }
   };
 
   const disconnectWallet = () => {
-    setWalletAddress(null);
+    console.log("Wallet disconnect functionality not implemented");
   };
 
+  useEffect(() => {
+    if (walletAddress) {
+      fetchBalance();
+    }
+  }, [walletAddress]);
+
   return (
-    <Card className="bg-card">
-      <CardContent className="py-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="text-foreground font-bold text-xl">DSCVRY</div>
+    <div className="bg-neutral-800 border-b">
+      <div className="max-w-2xl mx-auto py-4 px-4">
+        <div className="flex justify-between items-center">
+          <Link href="/">
+            {" "}
+            <div className="text-white font-bold text-xl">DSCVRY</div>
+          </Link>
+
           <div className="flex items-center">
             {walletAddress ? (
               <>
-                <span className="text-foreground mr-4">
-                  Balance: {balance !== null ? `${balance} SOL` : "Loading..."}
+                <span className="text-white mr-4">
+                  Balance:{" "}
+                  {balance !== null
+                    ? `${balance.toFixed(4)} SOL`
+                    : "Loading..."}
                 </span>
-                <span className="text-foreground mr-4">
+                <span className="text-white mr-4">
                   {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
                 </span>
                 <Button onClick={disconnectWallet} variant="destructive">
@@ -49,13 +63,13 @@ export const Navbar: React.FC = () => {
                 </Button>
               </>
             ) : (
-              <Button onClick={connectWallet} variant="default">
+              <Button onClick={connectWallet} variant="outline">
                 Connect Wallet
               </Button>
             )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

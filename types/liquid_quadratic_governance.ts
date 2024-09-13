@@ -5,9 +5,9 @@
  * IDL can be found at `target/idl/liquid_quadratic_governance.json`.
  */
 export type LiquidQuadraticGovernance = {
-  address: "EHaj8vkVimvsC6Z4nnotUQ6kDf1kC39X2wbaaJxz8jSC";
+  address: "AEpEkRkBqLz8BwqENLG1eYU82JPqUWrRGNqRmQmpiMao";
   metadata: {
-    name: "LiquidQuadraticGovernance";
+    name: "liquidQuadraticGovernance";
     version: "0.1.0";
     spec: "0.1.0";
     description: "Created with Anchor";
@@ -57,6 +57,10 @@ export type LiquidQuadraticGovernance = {
         }
       ];
       args: [
+        {
+          name: "title";
+          type: "string";
+        },
         {
           name: "description";
           type: "string";
@@ -396,6 +400,10 @@ export type LiquidQuadraticGovernance = {
           {
             name: "id";
             type: "u64";
+          },
+          {
+            name: "title";
+            type: "string";
           },
           {
             name: "description";

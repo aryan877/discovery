@@ -25,6 +25,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ClusterInfo, clusterList } from "@/lib/cluster";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import Back from "../component/Back";
 
 const CanvasSolanaTransfer: React.FC = () => {
   const { client: canvasClient, user } = useCanvasWallet();
@@ -33,7 +34,7 @@ const CanvasSolanaTransfer: React.FC = () => {
   const [targetAddress, setTargetAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [successfulSignedTx, setSuccessfulSignedTx] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -110,9 +111,11 @@ const CanvasSolanaTransfer: React.FC = () => {
     };
   };
 
-  const sendTransaction = async () => {
+  const sendTransaction = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!canvasClient) return;
     setErrorMessage("");
+    setSuccessMessage("");
     setIsProcessing(true);
 
     try {
@@ -122,52 +125,58 @@ const CanvasSolanaTransfer: React.FC = () => {
       );
 
       if (!response) {
-        setErrorMessage("Transaction not executed");
-        return;
+        throw new Error("Transaction not executed");
       }
 
       if (response.untrusted.success) {
-        setSuccessfulSignedTx(response.untrusted.signedTx);
+        setSuccessMessage("Transaction sent successfully");
+        setSourceAddress("");
+        setTargetAddress("");
+        setAmount("");
       } else if (response.untrusted.errorReason === "user-cancelled") {
-        setErrorMessage("User cancelled transaction");
+        throw new Error("User cancelled transaction");
       } else {
-        setErrorMessage(response.untrusted.error || "Unknown error");
+        throw new Error(response.untrusted.error || "Unknown error");
       }
     } catch (error) {
       console.error("Error sending transaction:", error);
-      setErrorMessage("Failed to send transaction");
+      setErrorMessage(`Failed to send transaction: ${error}`);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const openTransactionLink = () => {
-    if (!successfulSignedTx || !canvasClient) return;
-    const url = `https://solana.fm/tx/${successfulSignedTx}?cluster=${clusterInfo.cluster}`;
-    canvasClient.openLink(url);
-  };
-
-  const clear = () => {
-    setErrorMessage("");
-    setSuccessfulSignedTx("");
-    setSourceAddress("");
-    setTargetAddress("");
-    setAmount("");
-    setClusterInfo(clusterList[0]);
-  };
-
   return (
-    <div
-      ref={bodyRef}
-      className="flex flex-col justify-center items-center gap-6 w-screen p-10"
-    >
-      <Card className="w-full max-w-2xl">
+    <div className="w-full max-w-2xl mx-auto mt-10">
+      <Back />
+      <h1 className="text-2xl font-bold mb-6 text-white">Solana Transfer</h1>
+
+      {errorMessage && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert variant="default" className="mb-6">
+          <AlertDescription>{successMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      <Card className="bg-neutral-800 border-neutral-600">
         <CardHeader className="flex flex-col gap-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Solana Transfer</h1>
+            <h2 className="text-xl font-semibold text-white">
+              Send Transaction
+            </h2>
             {user && (
               <Link href={`/profile/${user.username}`} passHref>
-                <Button variant="outline">View Profile</Button>
+                <Button
+                  variant="outline"
+                  className="text-white border-neutral-600"
+                >
+                  View Profile
+                </Button>
               </Link>
             )}
           </div>
@@ -179,9 +188,9 @@ const CanvasSolanaTransfer: React.FC = () => {
                 variant={
                   clusterInfo.cluster === clusterItem.cluster
                     ? "default"
-                    : "secondary"
+                    : "outline"
                 }
-                className="mx-1"
+                className="mx-1 text-white border-neutral-600"
               >
                 {clusterItem.name}
               </Button>
@@ -189,72 +198,59 @@ const CanvasSolanaTransfer: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {successfulSignedTx ? (
-            <div className="flex flex-col justify-center items-center gap-6">
-              <Alert variant="default">
-                <AlertDescription>
-                  Transaction sent successfully
-                </AlertDescription>
-              </Alert>
-              <Button variant="link" onClick={openTransactionLink}>
-                Open in Solana.fm
-              </Button>
-              <Button onClick={clear} variant="secondary">
-                Close
-              </Button>
-            </div>
-          ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                sendTransaction();
-              }}
-              className="space-y-6"
-            >
-              <h2 className="text-2xl text-center">Send Transaction</h2>
-              {sourceAddress && (
-                <div className="flex items-center gap-4">
-                  <Label className="min-w-28">Source Address</Label>
-                  <span className="flex-1 text-gray-400 truncate">
-                    {sourceAddress}
-                  </span>
-                </div>
-              )}
+          <form onSubmit={sendTransaction} className="space-y-4">
+            {sourceAddress && (
               <div className="space-y-2">
-                <Label htmlFor="target">Target address</Label>
+                <Label className="text-sm text-white">Source Address</Label>
                 <Input
                   type="text"
-                  id="target"
-                  value={targetAddress}
-                  onChange={(e) => setTargetAddress(e.target.value)}
+                  value={sourceAddress}
+                  readOnly
+                  className="text-white border-neutral-600 bg-neutral-700"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount (SOL)</Label>
-                <Input
-                  type="number"
-                  id="amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  step="0.000000001"
-                />
-              </div>
-              {errorMessage && (
-                <Alert variant="destructive">
-                  <AlertDescription>{errorMessage}</AlertDescription>
-                </Alert>
-              )}
-            </form>
-          )}
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="target" className="text-sm text-white">
+                Target Address
+              </Label>
+              <Input
+                id="target"
+                type="text"
+                value={targetAddress}
+                onChange={(e) => setTargetAddress(e.target.value)}
+                placeholder="Enter target address"
+                required
+                className="text-white border-neutral-600"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-sm text-white">
+                Amount (SOL)
+              </Label>
+              <Input
+                id="amount"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount"
+                step="0.000000001"
+                required
+                className="text-white border-neutral-600"
+              />
+            </div>
+          </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-end mt-4">
           <Button
-            type="submit"
             onClick={sendTransaction}
-            disabled={isProcessing}
-            variant={
-              clusterInfo.cluster === "mainnet-beta" ? "destructive" : "default"
-            }
+            disabled={isProcessing || !targetAddress || !amount}
+            variant="outline"
+            className={`text-white border-neutral-600 ${
+              clusterInfo.cluster === "mainnet-beta"
+                ? "bg-red-600 hover:bg-red-700 border-none"
+                : ""
+            }`}
           >
             {isProcessing ? "Processing..." : `Send (${clusterInfo.name})`}
           </Button>

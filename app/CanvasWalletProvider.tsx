@@ -9,7 +9,12 @@ import React, {
 } from "react";
 import { CanvasClient, CanvasInterface } from "@dscvr-one/canvas-client-sdk";
 import { registerCanvasWallet } from "@dscvr-one/canvas-wallet-adapter";
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  LAMPORTS_PER_SOL,
+} from "@solana/web3.js";
 import bs58 from "bs58";
 import { clusterList } from "@/lib/cluster";
 
@@ -19,12 +24,14 @@ interface CanvasWalletState {
   icon: string | null;
   user: CanvasInterface.Lifecycle.User | undefined;
   content: CanvasInterface.Lifecycle.Content | undefined;
+  balance: number | null;
 }
 
 interface CanvasWalletContextValue extends CanvasWalletState {
   isIframe: boolean;
   initializeWallet: () => Promise<void>;
   executeTransaction: (tx: Transaction) => Promise<any | null>;
+  fetchBalance: () => Promise<void>;
 }
 
 const CanvasWalletContext = createContext<CanvasWalletContextValue | null>(
@@ -37,6 +44,7 @@ const initialState: CanvasWalletState = {
   icon: null,
   user: undefined,
   content: undefined,
+  balance: null,
 };
 
 export const CanvasWalletProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -90,12 +98,13 @@ export const CanvasWalletProvider: React.FC<{ children: React.ReactNode }> = ({
       ) {
         setState((prev) => ({
           ...prev,
-          //@ts-ignore
+          // @ts-ignore
           address: response.untrusted.address,
-          //@ts-ignore
+          // @ts-ignore
           icon: response.untrusted.walletIcon,
         }));
         console.log("Wallet initialized:", response.untrusted.address);
+        fetchBalance();
       } else {
         console.error("Wallet initialization failed");
       }
@@ -136,6 +145,8 @@ export const CanvasWalletProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (result?.untrusted?.success) {
         console.log("Transaction executed successfully:", result);
+
+        fetchBalance();
         return result;
       } else {
         console.error("Transaction execution failed");
@@ -146,11 +157,37 @@ export const CanvasWalletProvider: React.FC<{ children: React.ReactNode }> = ({
     return null;
   };
 
+  const fetchBalance = async () => {
+    if (!state.address) {
+      console.error("Wallet address unavailable");
+      return;
+    }
+
+    try {
+      const connection = new Connection(
+        process.env.NEXT_PUBLIC_SOLANA_RPC || "https://api.devnet.solana.com/",
+        "confirmed"
+      );
+      const publicKey = new PublicKey(state.address);
+      const balanceInLamports = await connection.getBalance(publicKey);
+      const balanceInSOL = balanceInLamports / LAMPORTS_PER_SOL;
+
+      setState((prev) => ({
+        ...prev,
+        balance: balanceInSOL,
+      }));
+      console.log("Wallet balance updated:", balanceInSOL);
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+    }
+  };
+
   const contextValue: CanvasWalletContextValue = {
     ...state,
     isIframe,
     initializeWallet,
     executeTransaction,
+    fetchBalance,
   };
 
   return (

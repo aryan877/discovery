@@ -22,16 +22,19 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
+import { RefreshCcw } from "lucide-react";
 import useCanvasWallet from "../CanvasWalletProvider";
 import { clusterList } from "@/lib/cluster";
-import { PROGRAM_ID } from "@/lib/constants";
+import { PROGRAM_ID_STRING } from "@/lib/constants";
+import Back from "../component/Back";
 
-const PROGRAM_ID_PK = new PublicKey(PROGRAM_ID!);
+const PROGRAM_ID = new PublicKey(PROGRAM_ID_STRING!);
 
 const CreateProposal: React.FC = () => {
   const { client } = useCanvasWallet();
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [votingPeriod, setVotingPeriod] = useState("");
+  const [votingPeriodHours, setVotingPeriodHours] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -46,14 +49,18 @@ const CreateProposal: React.FC = () => {
     governancePDA: PublicKey,
     proposalPDA: PublicKey,
     userPubkey: PublicKey,
+    title: string,
     description: string,
-    votingPeriod: number
+    votingPeriodSeconds: number
   ): TransactionInstruction => {
     const discriminator = Buffer.from([132, 116, 68, 174, 216, 160, 198, 22]);
+    const titleBuffer = Buffer.from(title);
+    const titleLength = Buffer.alloc(4);
+    titleLength.writeUInt32LE(titleBuffer.length);
     const descriptionBuffer = Buffer.from(description);
     const descriptionLength = Buffer.alloc(4);
     descriptionLength.writeUInt32LE(descriptionBuffer.length);
-    const votingPeriodBuffer = new BN(votingPeriod).toArrayLike(
+    const votingPeriodBuffer = new BN(votingPeriodSeconds).toArrayLike(
       Buffer,
       "le",
       8
@@ -61,6 +68,8 @@ const CreateProposal: React.FC = () => {
 
     const data = Buffer.concat([
       discriminator,
+      titleLength,
+      titleBuffer,
       descriptionLength,
       descriptionBuffer,
       votingPeriodBuffer,
@@ -73,7 +82,7 @@ const CreateProposal: React.FC = () => {
         { pubkey: userPubkey, isSigner: true, isWritable: true },
         { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
       ],
-      programId: PROGRAM_ID_PK,
+      programId: PROGRAM_ID,
       data: data,
     });
   };
@@ -86,7 +95,7 @@ const CreateProposal: React.FC = () => {
       return;
     }
 
-    if (!description || !votingPeriod) {
+    if (!title || !description || !votingPeriodHours) {
       setErrorMessage("Please fill in all fields");
       return;
     }
@@ -113,7 +122,7 @@ const CreateProposal: React.FC = () => {
 
           const [governancePDA] = PublicKey.findProgramAddressSync(
             [Buffer.from("governance")],
-            PROGRAM_ID_PK
+            PROGRAM_ID
           );
 
           const governanceAccount = await connection.getAccountInfo(
@@ -132,15 +141,20 @@ const CreateProposal: React.FC = () => {
               Buffer.from("proposal"),
               proposalCount.toArrayLike(Buffer, "le", 8),
             ],
-            PROGRAM_ID_PK
+            PROGRAM_ID
+          );
+
+          const votingPeriodSeconds = Math.floor(
+            parseFloat(votingPeriodHours) * 3600
           );
 
           const instruction = createProposalInstruction(
             governancePDA,
             proposalPDA,
             userPubkey,
+            title,
             description,
-            parseInt(votingPeriod)
+            votingPeriodSeconds
           );
 
           const { blockhash } = await connection.getLatestBlockhash();
@@ -166,8 +180,9 @@ const CreateProposal: React.FC = () => {
       if (response && response.untrusted.success) {
         console.log("Transaction signature:", response.untrusted.signedTx);
         setSuccessMessage("Proposal created successfully!");
+        setTitle("");
         setDescription("");
-        setVotingPeriod("");
+        setVotingPeriodHours("");
       } else {
         throw new Error("Transaction failed");
       }
@@ -180,55 +195,83 @@ const CreateProposal: React.FC = () => {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto mt-10">
-      <CardHeader>
-        <h1 className="text-2xl font-bold">Create Proposal</h1>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleCreateProposal} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="description">Proposal Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter proposal description"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="votingPeriod">Voting Period (in seconds)</Label>
-            <Input
-              id="votingPeriod"
-              type="number"
-              value={votingPeriod}
-              onChange={(e) => setVotingPeriod(e.target.value)}
-              placeholder="Enter voting period"
-              required
-            />
-          </div>
-          {errorMessage && (
-            <Alert variant="destructive">
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert variant="default">
-              <AlertDescription>{successMessage}</AlertDescription>
-            </Alert>
-          )}
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Button
-          type="submit"
-          onClick={handleCreateProposal}
-          disabled={isProcessing || !description || !votingPeriod}
-        >
-          {isProcessing ? "Creating..." : "Create Proposal"}
-        </Button>
-      </CardFooter>
-    </Card>
+    <div className="w-full max-w-2xl mx-auto mt-10">
+      <Back />
+      <h1 className="text-2xl font-bold mb-6 text-white">Create Proposal</h1>
+
+      {errorMessage && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert variant="default" className="mb-6">
+          <AlertDescription>{successMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      <Card className="bg-neutral-800 border-neutral-600">
+        <CardContent className="pt-6">
+          <form onSubmit={handleCreateProposal} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm text-white">
+                Proposal Title
+              </Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter proposal title"
+                required
+                className="text-white border-neutral-600"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm text-white">
+                Proposal Description
+              </Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter proposal description"
+                required
+                className="text-white border-neutral-600 min-h-[100px]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="votingPeriodHours" className="text-sm text-white">
+                Voting Period (hours)
+              </Label>
+              <Input
+                id="votingPeriodHours"
+                type="number"
+                step="0.1"
+                min="0"
+                value={votingPeriodHours}
+                onChange={(e) => setVotingPeriodHours(e.target.value)}
+                placeholder="Enter voting period"
+                required
+                className="text-white border-neutral-600"
+              />
+            </div>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-end mt-4">
+          <Button
+            onClick={handleCreateProposal}
+            disabled={
+              isProcessing || !title || !description || !votingPeriodHours
+            }
+            variant="outline"
+            className="text-white border-neutral-600"
+          >
+            {isProcessing ? "Creating..." : "Create Proposal"}
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 };
 
