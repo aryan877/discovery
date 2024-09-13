@@ -27,6 +27,7 @@ import useCanvasWallet from "../CanvasWalletProvider";
 import { clusterList } from "@/lib/cluster";
 import { PROGRAM_ID_STRING } from "@/lib/constants";
 import Back from "../component/Back";
+import RichTextEditor from "../component/RichTextEditor";
 
 const PROGRAM_ID = new PublicKey(PROGRAM_ID_STRING!);
 
@@ -212,7 +213,10 @@ const CreateProposal: React.FC = () => {
       )}
 
       <Card className="bg-neutral-800 border-neutral-600">
-        <CardContent className="pt-6">
+        <CardHeader>
+          <h2 className="text-xl font-semibold text-white">New Proposal</h2>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleCreateProposal} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm text-white">
@@ -231,13 +235,10 @@ const CreateProposal: React.FC = () => {
               <Label htmlFor="description" className="text-sm text-white">
                 Proposal Description
               </Label>
-              <Textarea
-                id="description"
+              <RichTextEditor
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter proposal description"
-                required
-                className="text-white border-neutral-600 min-h-[100px]"
+                onChange={setDescription}
+                disabled={isProcessing}
               />
             </div>
             <div className="space-y-2">
@@ -265,9 +266,16 @@ const CreateProposal: React.FC = () => {
               isProcessing || !title || !description || !votingPeriodHours
             }
             variant="outline"
-            className="text-white border-neutral-600"
+            className="w-full text-white"
           >
-            {isProcessing ? "Creating..." : "Create Proposal"}
+            {isProcessing ? (
+              <>
+                <RefreshCcw className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Create Proposal"
+            )}
           </Button>
         </CardFooter>
       </Card>

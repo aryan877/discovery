@@ -6,131 +6,26 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import duration from "dayjs/plugin/duration";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCcw, AlertTriangle, CalendarDays } from "lucide-react";
-import useCanvasWallet from "../CanvasWalletProvider";
+import { RefreshCcw } from "lucide-react";
 import { clusterList } from "@/lib/cluster";
 import { PROGRAM_ID_STRING } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  deserializeProposal,
+  Proposal,
+  ProposalStatus,
+} from "@/lib/proposalUtils";
+import Link from "next/link";
 
 dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 
 const PROGRAM_ID_PK = new PublicKey(PROGRAM_ID_STRING);
-
-interface ProposalStatus {
-  active?: {};
-  passed?: {};
-  rejected?: {};
-}
-
-interface ProposalAccount {
-  id: bigint;
-  title: string;
-  description: string;
-  creator: PublicKey;
-  yesVotes: bigint;
-  noVotes: bigint;
-  status: ProposalStatus;
-  startTime: bigint;
-  endTime: bigint;
-}
-
-interface Proposal {
-  publicKey: string;
-  account: ProposalAccount;
-}
-
-function deserializeProposal(
-  publicKey: string,
-  accountData: Buffer
-): Proposal | null {
-  try {
-    const PROPOSAL_DISCRIMINATOR = Buffer.from([
-      26, 94, 189, 187, 116, 136, 53, 33,
-    ]);
-    if (!accountData.slice(0, 8).equals(PROPOSAL_DISCRIMINATOR)) {
-      return null;
-    }
-
-    let offset = 8; // Start after the discriminator
-
-    // ID (u64)
-    const id = accountData.readBigUInt64LE(offset);
-    offset += 8;
-
-    // Title (string)
-    const titleLen = accountData.readUInt32LE(offset);
-    offset += 4;
-    const title = accountData.slice(offset, offset + titleLen).toString("utf8");
-    offset += titleLen;
-
-    // Description (string)
-    const descriptionLen = accountData.readUInt32LE(offset);
-    offset += 4;
-    const description = accountData
-      .slice(offset, offset + descriptionLen)
-      .toString("utf8");
-    offset += descriptionLen;
-
-    // Creator (PublicKey, 32 bytes)
-    const creator = new PublicKey(accountData.slice(offset, offset + 32));
-    offset += 32;
-
-    // YesVotes (u64)
-    const yesVotes = accountData.readBigUInt64LE(offset);
-    offset += 8;
-
-    // NoVotes (u64)
-    const noVotes = accountData.readBigUInt64LE(offset);
-    offset += 8;
-
-    // Status (enum - Active, Passed, Rejected)
-    const statusByte = accountData[offset];
-    let status: ProposalStatus;
-    if (statusByte === 0) status = { active: {} };
-    else if (statusByte === 1) status = { passed: {} };
-    else if (statusByte === 2) status = { rejected: {} };
-    else throw new Error("Invalid status byte");
-    offset += 1;
-
-    // Start Time (i64)
-    const startTime = accountData.readBigInt64LE(offset);
-    offset += 8;
-
-    // End Time (i64)
-    const endTime = accountData.readBigInt64LE(offset);
-
-    return {
-      publicKey,
-      account: {
-        id,
-        title,
-        description,
-        creator,
-        yesVotes,
-        noVotes,
-        status,
-        startTime,
-        endTime,
-      },
-    };
-  } catch (err) {
-    console.error("Error parsing account data:", err);
-    return null;
-  }
-}
 
 const ProposalFeed: React.FC = () => {
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -253,9 +148,11 @@ const ProposalFeed: React.FC = () => {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-lg font-semibold">
-                  {proposal.account.title || "Title Missing"}
-                </h2>
+                <Link href={`/proposal/${proposal.publicKey}`}>
+                  <h2 className="text-lg font-semibold">
+                    {proposal.account.title || "Title Missing"}
+                  </h2>
+                </Link>
                 <p className="text-xs text-muted-foreground">
                   Created by: {proposal.account.creator.toBase58().slice(0, 4)}
                   ...
